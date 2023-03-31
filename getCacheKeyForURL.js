@@ -5,29 +5,27 @@
   license that can be found in the LICENSE file or at
   https://opensource.org/licenses/MIT.
 */
-import { getOrCreatePrecacheController } from './utils/getOrCreatePrecacheController.js';
-import './_version.js';
+import { getOrCreatePrecacheController } from './getOrCreatePrecacheController.js';
+import { generateURLVariations } from './generateURLVariations.js';
+import '../_version.js';
 /**
- * Takes in a URL, and returns the corresponding URL that could be used to
- * lookup the entry in the precache.
+ * This function will take the request URL and manipulate it based on the
+ * configuration options.
  *
- * If a relative URL is provided, the location of the service worker file will
- * be used as the base.
+ * @param {string} url
+ * @param {Object} options
+ * @return {string} Returns the URL in the cache that matches the request,
+ * if possible.
  *
- * For precached entries without revision information, the cache key will be the
- * same as the original URL.
- *
- * For precached entries with revision information, the cache key will be the
- * original URL with the addition of a query parameter used for keeping track of
- * the revision info.
- *
- * @param {string} url The URL whose cache key to look up.
- * @return {string} The cache key that corresponds to that URL.
- *
- * @memberof workbox-precaching
+ * @private
  */
-function getCacheKeyForURL(url) {
+export const getCacheKeyForURL = (url, options) => {
     const precacheController = getOrCreatePrecacheController();
-    return precacheController.getCacheKeyForURL(url);
-}
-export { getCacheKeyForURL };
+    const urlsToCacheKeys = precacheController.getURLsToCacheKeys();
+    for (const possibleURL of generateURLVariations(url, options)) {
+        const possibleCacheKey = urlsToCacheKeys.get(possibleURL);
+        if (possibleCacheKey) {
+            return possibleCacheKey;
+        }
+    }
+};
