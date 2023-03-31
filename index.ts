@@ -6,22 +6,35 @@
   https://opensource.org/licenses/MIT.
 */
 
-import {
-  BroadcastCacheUpdate,
-  BroadcastCacheUpdateOptions,
-} from './BroadcastCacheUpdate.js';
-import {BroadcastUpdatePlugin} from './BroadcastUpdatePlugin.js';
-import {responsesAreSame} from './responsesAreSame.js';
+import {BackgroundSyncPlugin} from './BackgroundSyncPlugin.js';
+import {Queue, QueueOptions} from './Queue.js';
+import {QueueStore} from './QueueStore.js';
+import {StorableRequest} from './StorableRequest.js';
 
 import './_version.js';
 
-/**
- * @module workbox-broadcast-update
- */
+// See https://github.com/GoogleChrome/workbox/issues/2946
+interface SyncManager {
+  getTags(): Promise<string[]>;
+  register(tag: string): Promise<void>;
+}
 
-export {
-  BroadcastCacheUpdate,
-  BroadcastCacheUpdateOptions,
-  BroadcastUpdatePlugin,
-  responsesAreSame,
-};
+declare global {
+  interface ServiceWorkerRegistration {
+    readonly sync: SyncManager;
+  }
+
+  interface SyncEvent extends ExtendableEvent {
+    readonly lastChance: boolean;
+    readonly tag: string;
+  }
+
+  interface ServiceWorkerGlobalScopeEventMap {
+    sync: SyncEvent;
+  }
+}
+
+/**
+ * @module workbox-background-sync
+ */
+export {BackgroundSyncPlugin, Queue, QueueOptions, QueueStore, StorableRequest};
