@@ -1,69 +1,170 @@
-# unicode-match-property-ecmascript [![Build status](https://travis-ci.org/mathiasbynens/unicode-match-property-ecmascript.svg?branch=main)](https://travis-ci.org/mathiasbynens/unicode-match-property-ecmascript) [![unicode-match-property-ecmascript on npm](https://img.shields.io/npm/v/unicode-match-property-ecmascript)](https://www.npmjs.com/package/unicode-match-property-ecmascript)
+# type-is
 
-_unicode-match-property-ecmascript_ matches a given Unicode property or [property alias](https://github.com/mathiasbynens/unicode-property-aliases-ecmascript) to its canonical property name without applying [loose matching](https://github.com/mathiasbynens/unicode-loose-match) per the algorithm used for [RegExp Unicode property escapes in ECMAScript](https://github.com/tc39/proposal-regexp-unicode-property-escapes). Consider it a strict alternative to loose matching.
+[![NPM Version][npm-version-image]][npm-url]
+[![NPM Downloads][npm-downloads-image]][npm-url]
+[![Node.js Version][node-version-image]][node-version-url]
+[![Build Status][travis-image]][travis-url]
+[![Test Coverage][coveralls-image]][coveralls-url]
 
-## Installation
+Infer the content-type of a request.
 
-To use _unicode-match-property-ecmascript_ programmatically, install it as a dependency via [npm](https://www.npmjs.com/):
+### Install
 
-```bash
-$ npm install unicode-match-property-ecmascript
-```
+This is a [Node.js](https://nodejs.org/en/) module available through the
+[npm registry](https://www.npmjs.com/). Installation is done using the
+[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
 
-Then, `require` it:
-
-```js
-const matchProperty = require('unicode-match-property-ecmascript');
+```sh
+$ npm install type-is
 ```
 
 ## API
 
-This module exports a single function named `matchProperty`.
-
-### `matchProperty(value)`
-
-This function takes a string `value` and attempts to match it to a canonical Unicode property name. If there’s a match, it returns the canonical property name. Otherwise, it throws an exception.
-
 ```js
-// Find the canonical property name:
-matchProperty('sc')
-// → 'Script'
+var http = require('http')
+var typeis = require('type-is')
 
-matchProperty('Script')
-// → 'Script'
-
-matchProperty('script') // Note: incorrect casing.
-// → throws
+http.createServer(function (req, res) {
+  var istext = typeis(req, ['text/*'])
+  res.end('you ' + (istext ? 'sent' : 'did not send') + ' me text')
+})
 ```
 
-## For maintainers
+### typeis(request, types)
 
-### How to publish a new release
+Checks if the `request` is one of the `types`. If the request has no body,
+even if there is a `Content-Type` header, then `null` is returned. If the
+`Content-Type` header is invalid or does not matches any of the `types`, then
+`false` is returned. Otherwise, a string of the type that matched is returned.
 
-1. On the `main` branch, bump the version number in `package.json`:
+The `request` argument is expected to be a Node.js HTTP request. The `types`
+argument is an array of type strings.
 
-    ```sh
-    npm version patch -m 'Release v%s'
-    ```
+Each type in the `types` array can be one of the following:
 
-    Instead of `patch`, use `minor` or `major` [as needed](https://semver.org/).
+- A file extension name such as `json`. This name will be returned if matched.
+- A mime type such as `application/json`.
+- A mime type with a wildcard such as `*/*` or `*/json` or `application/*`.
+  The full mime type will be returned if matched.
+- A suffix such as `+json`. This can be combined with a wildcard such as
+  `*/vnd+json` or `application/*+json`. The full mime type will be returned
+  if matched.
 
-    Note that this produces a Git commit + tag.
+Some examples to illustrate the inputs and returned value:
 
-1. Push the release commit and tag:
+<!-- eslint-disable no-undef -->
 
-    ```sh
-    git push && git push --tags
-    ```
+```js
+// req.headers.content-type = 'application/json'
 
-    Our CI then automatically publishes the new release to npm.
+typeis(req, ['json']) // => 'json'
+typeis(req, ['html', 'json']) // => 'json'
+typeis(req, ['application/*']) // => 'application/json'
+typeis(req, ['application/json']) // => 'application/json'
 
-## Author
+typeis(req, ['html']) // => false
+```
 
-| [![twitter/mathias](https://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter") |
-|---|
-| [Mathias Bynens](https://mathiasbynens.be/) |
+### typeis.hasBody(request)
+
+Returns a Boolean if the given `request` has a body, regardless of the
+`Content-Type` header.
+
+Having a body has no relation to how large the body is (it may be 0 bytes).
+This is similar to how file existence works. If a body does exist, then this
+indicates that there is data to read from the Node.js request stream.
+
+<!-- eslint-disable no-undef -->
+
+```js
+if (typeis.hasBody(req)) {
+  // read the body, since there is one
+
+  req.on('data', function (chunk) {
+    // ...
+  })
+}
+```
+
+### typeis.is(mediaType, types)
+
+Checks if the `mediaType` is one of the `types`. If the `mediaType` is invalid
+or does not matches any of the `types`, then `false` is returned. Otherwise, a
+string of the type that matched is returned.
+
+The `mediaType` argument is expected to be a
+[media type](https://tools.ietf.org/html/rfc6838) string. The `types` argument
+is an array of type strings.
+
+Each type in the `types` array can be one of the following:
+
+- A file extension name such as `json`. This name will be returned if matched.
+- A mime type such as `application/json`.
+- A mime type with a wildcard such as `*/*` or `*/json` or `application/*`.
+  The full mime type will be returned if matched.
+- A suffix such as `+json`. This can be combined with a wildcard such as
+  `*/vnd+json` or `application/*+json`. The full mime type will be returned
+  if matched.
+
+Some examples to illustrate the inputs and returned value:
+
+<!-- eslint-disable no-undef -->
+
+```js
+var mediaType = 'application/json'
+
+typeis.is(mediaType, ['json']) // => 'json'
+typeis.is(mediaType, ['html', 'json']) // => 'json'
+typeis.is(mediaType, ['application/*']) // => 'application/json'
+typeis.is(mediaType, ['application/json']) // => 'application/json'
+
+typeis.is(mediaType, ['html']) // => false
+```
+
+## Examples
+
+### Example body parser
+
+```js
+var express = require('express')
+var typeis = require('type-is')
+
+var app = express()
+
+app.use(function bodyParser (req, res, next) {
+  if (!typeis.hasBody(req)) {
+    return next()
+  }
+
+  switch (typeis(req, ['urlencoded', 'json', 'multipart'])) {
+    case 'urlencoded':
+      // parse urlencoded body
+      throw new Error('implement urlencoded body parsing')
+    case 'json':
+      // parse json body
+      throw new Error('implement json body parsing')
+    case 'multipart':
+      // parse multipart body
+      throw new Error('implement multipart body parsing')
+    default:
+      // 415 error code
+      res.statusCode = 415
+      res.end()
+      break
+  }
+})
+```
 
 ## License
 
-_unicode-match-property-ecmascript_ is available under the [MIT](https://mths.be/mit) license.
+[MIT](LICENSE)
+
+[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/type-is/master
+[coveralls-url]: https://coveralls.io/r/jshttp/type-is?branch=master
+[node-version-image]: https://badgen.net/npm/node/type-is
+[node-version-url]: https://nodejs.org/en/download
+[npm-downloads-image]: https://badgen.net/npm/dm/type-is
+[npm-url]: https://npmjs.org/package/type-is
+[npm-version-image]: https://badgen.net/npm/v/type-is
+[travis-image]: https://badgen.net/travis/jshttp/type-is/master
+[travis-url]: https://travis-ci.org/jshttp/type-is

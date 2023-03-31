@@ -1,39 +1,58 @@
 {
-  "name": "unicode-match-property-ecmascript",
-  "version": "2.0.0",
-  "description": "Match a Unicode property or property alias to its canonical property name per the algorithm used for RegExp Unicode property escapes in ECMAScript.",
-  "homepage": "https://github.com/mathiasbynens/unicode-match-property-ecmascript",
-  "main": "index.js",
-  "engines": {
-    "node": ">=4"
-  },
-  "files": [
-    "LICENSE-MIT.txt",
-    "index.js"
-  ],
-  "keywords": [
-    "unicode",
-    "unicode properties",
-    "unicode property aliases"
-  ],
-  "license": "MIT",
-  "author": {
-    "name": "Mathias Bynens",
-    "url": "https://mathiasbynens.be/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mathiasbynens/unicode-match-property-ecmascript.git"
-  },
-  "bugs": "https://github.com/mathiasbynens/unicode-match-property-ecmascript/issues",
-  "dependencies": {
-    "unicode-canonical-property-names-ecmascript": "^2.0.0",
-    "unicode-property-aliases-ecmascript": "^2.0.0"
-  },
-  "devDependencies": {
-    "ava": "*"
-  },
-  "scripts": {
-    "test": "ava ./tests/*"
-  }
+	"name": "type-fest",
+	"version": "0.21.3",
+	"description": "A collection of essential TypeScript types",
+	"license": "(MIT OR CC0-1.0)",
+	"repository": "sindresorhus/type-fest",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "https://sindresorhus.com"
+	},
+	"engines": {
+		"node": ">=10"
+	},
+	"scripts": {
+		"test": "xo && tsd && tsc"
+	},
+	"files": [
+		"index.d.ts",
+		"base.d.ts",
+		"source",
+		"ts41"
+	],
+	"keywords": [
+		"typescript",
+		"ts",
+		"types",
+		"utility",
+		"util",
+		"utilities",
+		"omit",
+		"merge",
+		"json"
+	],
+	"devDependencies": {
+		"@sindresorhus/tsconfig": "~0.7.0",
+		"expect-type": "^0.11.0",
+		"tsd": "^0.14.0",
+		"typescript": "^4.1.3",
+		"xo": "^0.36.1"
+	},
+	"types": "./index.d.ts",
+	"typesVersions": {
+		">=4.1": {
+			"*": [
+				"ts41/*"
+			]
+		}
+	},
+	"xo": {
+		"rules": {
+			"@typescript-eslint/ban-types": "off",
+			"@typescript-eslint/indent": "off",
+			"node/no-unsupported-features/es-builtins": "off"
+		}
+	}
 }
