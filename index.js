@@ -1,19 +1,16 @@
 'use strict';
 
-const propertyToValueAliases = require('./data/mappings.js');
+const canonicalProperties = require('unicode-canonical-property-names-ecmascript');
+const propertyAliases = require('unicode-property-aliases-ecmascript');
 
-const matchPropertyValue = function(property, value) {
-	const aliasToValue = propertyToValueAliases.get(property);
-	if (!aliasToValue) {
-		throw new Error(`Unknown property \`${ property }\`.`);
+const matchProperty = function(property) {
+	if (canonicalProperties.has(property)) {
+		return property;
 	}
-	const canonicalValue = aliasToValue.get(value);
-	if (canonicalValue) {
-		return canonicalValue;
+	if (propertyAliases.has(property)) {
+		return propertyAliases.get(property);
 	}
-	throw new Error(
-		`Unknown value \`${ value }\` for property \`${ property }\`.`
-	);
+	throw new Error(`Unknown property: ${ property }`);
 };
 
-module.exports = matchPropertyValue;
+module.exports = matchProperty;

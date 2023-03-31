@@ -1,41 +1,38 @@
-# unicode-match-property-value-ecmascript [![Build status](https://travis-ci.org/mathiasbynens/unicode-match-property-value-ecmascript.svg?branch=main)](https://travis-ci.org/mathiasbynens/unicode-match-property-value-ecmascript) [![unicode-match-property-value-ecmascript on npm](https://img.shields.io/npm/v/unicode-match-property-value-ecmascript)](https://www.npmjs.com/package/unicode-match-property-value-ecmascript)
+# unicode-match-property-ecmascript [![Build status](https://travis-ci.org/mathiasbynens/unicode-match-property-ecmascript.svg?branch=main)](https://travis-ci.org/mathiasbynens/unicode-match-property-ecmascript) [![unicode-match-property-ecmascript on npm](https://img.shields.io/npm/v/unicode-match-property-ecmascript)](https://www.npmjs.com/package/unicode-match-property-ecmascript)
 
-_unicode-match-property-value-ecmascript_ matches a given Unicode property value or [property value alias](https://github.com/mathiasbynens/unicode-property-value-aliases) to its canonical property value without applying [loose matching](https://github.com/mathiasbynens/unicode-loose-match), per the algorithm used for [RegExp Unicode property escapes in ECMAScript](https://github.com/tc39/proposal-regexp-unicode-property-escapes). Consider it a strict alternative to loose matching.
+_unicode-match-property-ecmascript_ matches a given Unicode property or [property alias](https://github.com/mathiasbynens/unicode-property-aliases-ecmascript) to its canonical property name without applying [loose matching](https://github.com/mathiasbynens/unicode-loose-match) per the algorithm used for [RegExp Unicode property escapes in ECMAScript](https://github.com/tc39/proposal-regexp-unicode-property-escapes). Consider it a strict alternative to loose matching.
 
 ## Installation
 
-To use _unicode-match-property-value-ecmascript_ programmatically, install it as a dependency via [npm](https://www.npmjs.com/):
+To use _unicode-match-property-ecmascript_ programmatically, install it as a dependency via [npm](https://www.npmjs.com/):
 
 ```bash
-$ npm install unicode-match-property-value-ecmascript
+$ npm install unicode-match-property-ecmascript
 ```
 
 Then, `require` it:
 
 ```js
-const matchPropertyValue = require('unicode-match-property-value-ecmascript');
+const matchProperty = require('unicode-match-property-ecmascript');
 ```
 
 ## API
 
-This module exports a single function named `matchPropertyValue`.
+This module exports a single function named `matchProperty`.
 
-### `matchPropertyValue(property, value)`
+### `matchProperty(value)`
 
-This function takes a string `property` that is a canonical/unaliased Unicode property name, and a string `value`. It attemps to  match `value` to a canonical Unicode property value for the given property. If there’s a match, it returns the canonical property value. Otherwise, it throws an exception.
+This function takes a string `value` and attempts to match it to a canonical Unicode property name. If there’s a match, it returns the canonical property name. Otherwise, it throws an exception.
 
 ```js
-// Find the canonical property value:
-matchPropertyValue('Script_Extensions', 'Aghb')
-// → 'Caucasian_Albanian'
+// Find the canonical property name:
+matchProperty('sc')
+// → 'Script'
 
-matchPropertyValue('Script_Extensions', 'Caucasian_Albanian')
-// → 'Caucasian_Albanian'
+matchProperty('Script')
+// → 'Script'
 
-matchPropertyValue('script_extensions', 'Caucasian_Albanian') // Note: incorrect casing.
-// → throws
-
-matchPropertyValue('Script_Extensions', 'caucasian_albanian') // Note: incorrect casing.
+matchProperty('script') // Note: incorrect casing.
 // → throws
 ```
 
@@ -69,4 +66,4 @@ matchPropertyValue('Script_Extensions', 'caucasian_albanian') // Note: incorrect
 
 ## License
 
-_unicode-match-property-value-ecmascript_ is available under the [MIT](https://mths.be/mit) license.
+_unicode-match-property-ecmascript_ is available under the [MIT](https://mths.be/mit) license.
