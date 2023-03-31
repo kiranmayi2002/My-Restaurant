@@ -5,10 +5,11 @@
   license that can be found in the LICENSE file or at
   https://opensource.org/licenses/MIT.
 */
-import { CacheableResponse, } from './CacheableResponse.js';
-import { CacheableResponsePlugin } from './CacheableResponsePlugin.js';
+import { BroadcastCacheUpdate, } from './BroadcastCacheUpdate.js';
+import { BroadcastUpdatePlugin } from './BroadcastUpdatePlugin.js';
+import { responsesAreSame } from './responsesAreSame.js';
 import './_version.js';
 /**
- * @module workbox-cacheable-response
+ * @module workbox-broadcast-update
  */
-export { CacheableResponse, CacheableResponsePlugin };
+export { BroadcastCacheUpdate, BroadcastUpdatePlugin, responsesAreSame, };

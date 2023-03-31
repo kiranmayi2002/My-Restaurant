@@ -1,7 +1,8 @@
-import { CacheableResponse, CacheableResponseOptions } from './CacheableResponse.js';
-import { CacheableResponsePlugin } from './CacheableResponsePlugin.js';
+import { BroadcastCacheUpdate, BroadcastCacheUpdateOptions } from './BroadcastCacheUpdate.js';
+import { BroadcastUpdatePlugin } from './BroadcastUpdatePlugin.js';
+import { responsesAreSame } from './responsesAreSame.js';
 import './_version.js';
 /**
- * @module workbox-cacheable-response
+ * @module workbox-broadcast-update
  */
-export { CacheableResponse, CacheableResponseOptions, CacheableResponsePlugin };
+export { BroadcastCacheUpdate, BroadcastCacheUpdateOptions, BroadcastUpdatePlugin, responsesAreSame, };

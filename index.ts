@@ -6,13 +6,21 @@
   https://opensource.org/licenses/MIT.
 */
 
-import {CacheExpiration} from './CacheExpiration.js';
-import {ExpirationPlugin, ExpirationPluginOptions} from './ExpirationPlugin.js';
-
-import './_version.js';
+import {copyWorkboxLibraries} from './lib/copy-workbox-libraries';
+import {getModuleURL} from './lib/cdn-utils';
+import {generateSW} from './generate-sw';
+import {getManifest} from './get-manifest';
+import {injectManifest} from './inject-manifest';
 
 /**
- * @module workbox-expiration
+ * @module workbox-build
  */
+export {
+  copyWorkboxLibraries,
+  generateSW,
+  getManifest,
+  getModuleURL,
+  injectManifest,
+};
 
-export {CacheExpiration, ExpirationPlugin, ExpirationPluginOptions};
+export * from './types';

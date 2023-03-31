@@ -1,9 +1,9 @@
 {
-  "name": "workbox-cacheable-response",
+  "name": "workbox-broadcast-update",
   "version": "6.5.4",
   "license": "MIT",
   "author": "Google's Web DevRel Team",
-  "description": "This library takes a Response object and determines whether it's cacheable based on a specific configuration.",
+  "description": "A service worker helper library that uses the Broadcast Channel API to announce when a cached response has updated",
   "repository": "googlechrome/workbox",
   "bugs": "https://github.com/googlechrome/workbox/issues",
   "homepage": "https://github.com/GoogleChrome/workbox",
@@ -15,7 +15,7 @@
     "workbox-plugin"
   ],
   "workbox": {
-    "browserNamespace": "workbox.cacheableResponse",
+    "browserNamespace": "workbox.broadcastUpdate",
     "packageType": "sw"
   },
   "main": "index.js",
