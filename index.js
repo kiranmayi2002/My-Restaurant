@@ -1,77 +1,85 @@
 'use strict';
 
+var test = require('tape');
+var typedArrayLength = require('../');
+var isCallable = require('is-callable');
+var generators = require('make-generator-function')();
+var arrowFn = require('make-arrow-function')();
 var forEach = require('for-each');
-var callBind = require('call-bind');
+var inspect = require('object-inspect');
 
-var typedArrays = [
-	'Float32Array',
-	'Float64Array',
+var typedArrayNames = [
 	'Int8Array',
-	'Int16Array',
-	'Int32Array',
 	'Uint8Array',
 	'Uint8ClampedArray',
+	'Int16Array',
 	'Uint16Array',
+	'Int32Array',
 	'Uint32Array',
+	'Float32Array',
+	'Float64Array',
 	'BigInt64Array',
 	'BigUint64Array'
 ];
 
-var getters = {};
-var hasProto = [].__proto__ === Array.prototype; // eslint-disable-line no-proto
-var gOPD = Object.getOwnPropertyDescriptor;
-var oDP = Object.defineProperty;
-if (gOPD) {
-	var getLength = function (x) {
-		return x.length;
-	};
-	forEach(typedArrays, function (typedArray) {
-		// In Safari 7, Typed Array constructors are typeof object
-		if (typeof global[typedArray] === 'function' || typeof global[typedArray] === 'object') {
-			var Proto = global[typedArray].prototype;
-			var descriptor = gOPD(Proto, 'length');
-			if (!descriptor && hasProto) {
-				var superProto = Proto.__proto__; // eslint-disable-line no-proto
-				descriptor = gOPD(superProto, 'length');
-			}
-			// Opera 12.16 has a magic length data property on instances AND on Proto
-			if (descriptor && descriptor.get) {
-				getters[typedArray] = callBind(descriptor.get);
-			} else if (oDP) {
-				// this is likely an engine where instances have a magic length data property
-				var arr = new global[typedArray](2);
-				descriptor = gOPD(arr, 'length');
-				if (descriptor && descriptor.configurable) {
-					oDP(arr, 'length', { value: 3 });
-				}
-				if (arr.length === 2) {
-					getters[typedArray] = getLength;
-				}
-			}
+test('not arrays', function (t) {
+	t.test('non-number/string primitives', function (st) {
+		st.equal(false, typedArrayLength(), 'undefined is not typed array');
+		st.equal(false, typedArrayLength(null), 'null is not typed array');
+		st.equal(false, typedArrayLength(false), 'false is not typed array');
+		st.equal(false, typedArrayLength(true), 'true is not typed array');
+		st.end();
+	});
+
+	t.equal(false, typedArrayLength({}), 'object is not typed array');
+	t.equal(false, typedArrayLength(/a/g), 'regex literal is not typed array');
+	t.equal(false, typedArrayLength(new RegExp('a', 'g')), 'regex object is not typed array');
+	t.equal(false, typedArrayLength(new Date()), 'new Date() is not typed array');
+
+	t.test('numbers', function (st) {
+		st.equal(false, typedArrayLength(42), 'number is not typed array');
+		st.equal(false, typedArrayLength(Object(42)), 'number object is not typed array');
+		st.equal(false, typedArrayLength(NaN), 'NaN is not typed array');
+		st.equal(false, typedArrayLength(Infinity), 'Infinity is not typed array');
+		st.end();
+	});
+
+	t.test('strings', function (st) {
+		st.equal(false, typedArrayLength('foo'), 'string primitive is not typed array');
+		st.equal(false, typedArrayLength(Object('foo')), 'string object is not typed array');
+		st.end();
+	});
+
+	t.end();
+});
+
+test('Functions', function (t) {
+	t.equal(false, typedArrayLength(function () {}), 'function is not typed array');
+	t.end();
+});
+
+test('Generators', { skip: generators.length === 0 }, function (t) {
+	forEach(generators, function (genFn) {
+		t.equal(false, typedArrayLength(genFn), 'generator function ' + inspect(genFn) + ' is not typed array');
+	});
+	t.end();
+});
+
+test('Arrow functions', { skip: !arrowFn }, function (t) {
+	t.equal(false, typedArrayLength(arrowFn), 'arrow function is not typed array');
+	t.end();
+});
+
+test('Typed Arrays', function (t) {
+	forEach(typedArrayNames, function (typedArray) {
+		var TypedArray = global[typedArray];
+		if (isCallable(TypedArray)) {
+			var length = 10;
+			var arr = new TypedArray(length);
+			t.equal(typedArrayLength(arr), length, 'new ' + typedArray + '(10) is typed array of length ' + length);
+		} else {
+			t.comment('# SKIP ' + typedArray + ' is not supported');
 		}
 	});
-}
-
-var tryTypedArrays = function tryAllTypedArrays(value) {
-	var foundLength;
-	forEach(getters, function (getter) {
-		if (typeof foundLength !== 'number') {
-			try {
-				var length = getter(value);
-				if (typeof length === 'number') {
-					foundLength = length;
-				}
-			} catch (e) {}
-		}
-	});
-	return foundLength;
-};
-
-var isTypedArray = require('is-typed-array');
-
-module.exports = function typedArrayLength(value) {
-	if (!isTypedArray(value)) {
-		return false;
-	}
-	return tryTypedArrays(value);
-};
+	t.end();
+});
