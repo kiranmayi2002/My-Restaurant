@@ -1,19 +1,18 @@
 /*
-  Copyright 2018 Google LLC
+  Copyright 2020 Google LLC
 
   Use of this source code is governed by an MIT-style
   license that can be found in the LICENSE file or at
   https://opensource.org/licenses/MIT.
 */
-import { NavigationRoute, } from './NavigationRoute.js';
-import { RegExpRoute } from './RegExpRoute.js';
-import { registerRoute } from './registerRoute.js';
-import { Route } from './Route.js';
-import { Router } from './Router.js';
-import { setCatchHandler } from './setCatchHandler.js';
-import { setDefaultHandler } from './setDefaultHandler.js';
+import { googleFontsCache } from './googleFontsCache';
+import { imageCache } from './imageCache';
+import { staticResourceCache, } from './staticResourceCache';
+import { pageCache } from './pageCache';
+import { offlineFallback } from './offlineFallback';
+import { warmStrategyCache } from './warmStrategyCache';
 import './_version.js';
 /**
- * @module workbox-routing
+ * @module workbox-recipes
  */
-export { NavigationRoute, RegExpRoute, registerRoute, Route, Router, setCatchHandler, setDefaultHandler, };
+export { googleFontsCache, imageCache, offlineFallback, pageCache, staticResourceCache, warmStrategyCache, };

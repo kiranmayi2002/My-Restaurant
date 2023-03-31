@@ -1,10 +1,32 @@
-'use strict';
+/*
+  Copyright 2018 Google LLC
 
-module.exports = {
-  BINARY_TYPES: ['nodebuffer', 'arraybuffer', 'fragments'],
-  GUID: '258EAFA5-E914-47DA-95CA-C5AB0DC85B11',
-  kStatusCode: Symbol('status-code'),
-  kWebSocket: Symbol('websocket'),
-  EMPTY_BUFFER: Buffer.alloc(0),
-  NOOP: () => {}
-};
+  Use of this source code is governed by an MIT-style
+  license that can be found in the LICENSE file or at
+  https://opensource.org/licenses/MIT.
+*/
+import '../_version.js';
+/**
+ * The default HTTP method, 'GET', used when there's no specific method
+ * configured for a route.
+ *
+ * @type {string}
+ *
+ * @private
+ */
+export const defaultMethod = 'GET';
+/**
+ * The list of valid HTTP methods associated with requests that could be routed.
+ *
+ * @type {Array<string>}
+ *
+ * @private
+ */
+export const validMethods = [
+    'DELETE',
+    'GET',
+    'HEAD',
+    'PATCH',
+    'POST',
+    'PUT',
+];
