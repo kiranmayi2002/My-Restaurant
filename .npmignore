@@ -1,9 +1,10 @@
-CONTRIBUTING.md
-Makefile
-docs/
-examples/
-reports/
-test/
+*.bat
+.htaccess
 
-.jshintrc
-.travis.yml
+src
+
+npm-debug.log
+!*.gitkeep
+
+node_modules
+xeno

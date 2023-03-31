@@ -1,23 +1,7 @@
-/**
- * Merge object b with object a.
- *
- *     var a = { foo: 'bar' }
- *       , b = { bar: 'baz' };
- *
- *     merge(a, b);
- *     // => { foo: 'bar', bar: 'baz' }
- *
- * @param {Object} a
- * @param {Object} b
- * @return {Object}
- * @api public
- */
+'use strict';
 
-exports = module.exports = function(a, b){
-  if (a && b) {
-    for (var key in b) {
-      a[key] = b[key];
-    }
-  }
-  return a;
-};
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./cjs/use-sync-external-store.production.min.js');
+} else {
+  module.exports = require('./cjs/use-sync-external-store.development.js');
+}
