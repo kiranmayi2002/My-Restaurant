@@ -1,30 +1,25 @@
-import { Compiler, WebpackPluginInstance } from 'webpack';
-import { FileDescriptor } from './helpers';
-import { getCompilerHooks } from './hooks';
-export declare type Manifest = Record<string, any>;
-export interface InternalOptions {
-    [key: string]: any;
-    assetHookStage: number;
-    basePath: string;
-    fileName: string;
-    filter: (file: FileDescriptor) => Boolean;
-    generate: (seed: Record<any, any>, files: FileDescriptor[], entries: Record<string, string[]>) => Manifest;
-    map: (file: FileDescriptor) => FileDescriptor;
-    publicPath: string;
-    removeKeyHash: RegExp | false;
-    seed: Record<any, any>;
-    serialize: (manifest: Manifest) => string;
-    sort: (fileA: FileDescriptor, fileB: FileDescriptor) => Number;
-    transformExtensions: RegExp;
-    useEntryKeys: Boolean;
-    useLegacyEmit: Boolean;
-    writeToFileEmit: Boolean;
+/// <reference types="node" />
+
+import { Profiler } from 'inspector'
+import { CoverageMapData } from 'istanbul-lib-coverage'
+import { RawSourceMap } from 'source-map'
+
+declare type Sources =
+  | {
+      source: string
+    }
+  | {
+      source: string
+      originalSource: string
+      sourceMap: { sourcemap: RawSourceMap }
+    }
+declare class V8ToIstanbul {
+  load(): Promise<void>
+  destroy(): void
+  applyCoverage(blocks: ReadonlyArray<Profiler.FunctionCoverage>): void
+  toIstanbul(): CoverageMapData
 }
-export declare type ManifestPluginOptions = Partial<InternalOptions>;
-export declare type EmitCountMap = Map<any, any>;
-declare class WebpackManifestPlugin implements WebpackPluginInstance {
-    private options;
-    constructor(opts: ManifestPluginOptions);
-    apply(compiler: Compiler): void;
-}
-export { getCompilerHooks, WebpackManifestPlugin };
+
+declare function v8ToIstanbul(scriptPath: string, wrapperLength?: number, sources?: Sources, excludePath?: (path: string) => boolean): V8ToIstanbul
+
+export = v8ToIstanbul
