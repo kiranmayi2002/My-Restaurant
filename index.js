@@ -1,287 +1,425 @@
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
-function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
-/* global __resourceQuery, __webpack_hash__ */
-/// <reference types="webpack/module" />
-import webpackHotLog from "webpack/hot/log.js";
-import stripAnsi from "./utils/stripAnsi.js";
-import parseURL from "./utils/parseURL.js";
-import socket from "./socket.js";
-import { formatProblem, createOverlay } from "./overlay.js";
-import { log, logEnabledFeatures, setLogLevel } from "./utils/log.js";
-import sendMessage from "./utils/sendMessage.js";
-import reloadApp from "./utils/reloadApp.js";
-import createSocketURL from "./utils/createSocketURL.js";
+var assert = require('minimalistic-assert');
+var Buffer = require('buffer').Buffer;
 
-/**
- * @typedef {Object} Options
- * @property {boolean} hot
- * @property {boolean} liveReload
- * @property {boolean} progress
- * @property {boolean | { warnings?: boolean, errors?: boolean, runtimeErrors?: boolean, trustedTypesPolicyName?: string }} overlay
- * @property {string} [logging]
- * @property {number} [reconnect]
- */
+function WBuf() {
+  this.buffers = [];
+  this.toReserve = 0;
+  this.size = 0;
+  this.maxSize = 0;
+  this.avail = 0;
 
-/**
- * @typedef {Object} Status
- * @property {boolean} isUnloading
- * @property {string} currentHash
- * @property {string} [previousHash]
- */
+  this.last = null;
+  this.offset = 0;
 
-/**
- * @type {Status}
- */
-var status = {
-  isUnloading: false,
-  // TODO Workaround for webpack v4, `__webpack_hash__` is not replaced without HotModuleReplacement
-  // eslint-disable-next-line camelcase
-  currentHash: typeof __webpack_hash__ !== "undefined" ? __webpack_hash__ : ""
+  // Used in slicing
+  this.sliceQueue = null;
+
+  this.forceReserve = false;
+
+  // Mostly a constant
+  this.reserveRate = 64;
+}
+module.exports = WBuf;
+
+WBuf.prototype.reserve = function reserve(n) {
+  this.toReserve += n;
+
+  // Force reservation of extra bytes
+  if (this.forceReserve)
+    this.toReserve = Math.max(this.toReserve, this.reserveRate);
 };
 
-/** @type {Options} */
-var options = {
-  hot: false,
-  liveReload: false,
-  progress: false,
-  overlay: false
+WBuf.prototype._ensure = function _ensure(n) {
+  if (this.avail >= n)
+    return;
+
+  if (this.toReserve === 0)
+    this.toReserve = this.reserveRate;
+
+  this.toReserve = Math.max(n - this.avail, this.toReserve);
+
+  if (this.avail === 0)
+    this._next();
 };
-var parsedResourceQuery = parseURL(__resourceQuery);
-var enabledFeatures = {
-  "Hot Module Replacement": false,
-  "Live Reloading": false,
-  Progress: false,
-  Overlay: false
-};
-if (parsedResourceQuery.hot === "true") {
-  options.hot = true;
-  enabledFeatures["Hot Module Replacement"] = true;
-}
-if (parsedResourceQuery["live-reload"] === "true") {
-  options.liveReload = true;
-  enabledFeatures["Live Reloading"] = true;
-}
-if (parsedResourceQuery.progress === "true") {
-  options.progress = true;
-  enabledFeatures.Progress = true;
-}
-if (parsedResourceQuery.overlay) {
-  try {
-    options.overlay = JSON.parse(parsedResourceQuery.overlay);
-  } catch (e) {
-    log.error("Error parsing overlay options from resource query:", e);
+
+WBuf.prototype._next = function _next() {
+  var buf;
+  if (this.sliceQueue === null) {
+    // Most common case
+    buf = new Buffer(this.toReserve);
+  } else {
+    // Only for `.slice()` results
+    buf = this.sliceQueue.shift();
+    if (this.sliceQueue.length === 0)
+      this.sliceQueue = null;
   }
 
-  // Fill in default "true" params for partially-specified objects.
-  if (typeof options.overlay === "object") {
-    options.overlay = _objectSpread({
-      errors: true,
-      warnings: true,
-      runtimeErrors: true
-    }, options.overlay);
-  }
-  enabledFeatures.Overlay = true;
-}
-if (parsedResourceQuery.logging) {
-  options.logging = parsedResourceQuery.logging;
-}
-if (typeof parsedResourceQuery.reconnect !== "undefined") {
-  options.reconnect = Number(parsedResourceQuery.reconnect);
-}
+  this.toReserve = 0;
 
-/**
- * @param {string} level
- */
-function setAllLogLevel(level) {
-  // This is needed because the HMR logger operate separately from dev server logger
-  webpackHotLog.setLogLevel(level === "verbose" || level === "log" ? "info" : level);
-  setLogLevel(level);
-}
-if (options.logging) {
-  setAllLogLevel(options.logging);
-}
-logEnabledFeatures(enabledFeatures);
-self.addEventListener("beforeunload", function () {
-  status.isUnloading = true;
-});
-var overlay = typeof window !== "undefined" ? createOverlay(typeof options.overlay === "object" ? {
-  trustedTypesPolicyName: options.overlay.trustedTypesPolicyName,
-  catchRuntimeError: options.overlay.runtimeErrors
-} : {
-  trustedTypesPolicyName: false,
-  catchRuntimeError: options.overlay
-}) : {
-  send: function send() {}
+  this.buffers.push(buf);
+  this.avail = buf.length;
+  this.offset = 0;
+  this.last = buf;
 };
-var onSocketMessage = {
-  hot: function hot() {
-    if (parsedResourceQuery.hot === "false") {
-      return;
-    }
-    options.hot = true;
-  },
-  liveReload: function liveReload() {
-    if (parsedResourceQuery["live-reload"] === "false") {
-      return;
-    }
-    options.liveReload = true;
-  },
-  invalid: function invalid() {
-    log.info("App updated. Recompiling...");
 
-    // Fixes #1042. overlay doesn't clear if errors are fixed but warnings remain.
-    if (options.overlay) {
-      overlay.send({
-        type: "DISMISS"
-      });
+WBuf.prototype._rangeCheck = function _rangeCheck() {
+  if (this.maxSize !== 0 && this.size > this.maxSize)
+    throw new RangeError('WBuf overflow');
+};
+
+WBuf.prototype._move = function _move(n) {
+  this.size += n;
+  if (this.avail === 0)
+    this.last = null;
+
+  this._rangeCheck();
+};
+
+WBuf.prototype.slice = function slice(start, end) {
+  assert(0 <= start && start <= this.size);
+  assert(0 <= end && end <= this.size);
+
+  if (this.last === null)
+    this._next();
+
+  var res = new WBuf();
+
+  // Only last chunk is requested
+  if (start >= this.size - this.offset) {
+    res.buffers.push(this.last);
+    res.last = this.last;
+    res.offset = start - this.size + this.offset;
+    res.maxSize = end - start;
+    res.avail = res.maxSize;
+
+    return res;
+  }
+
+  var startIndex = -1;
+  var startOffset = 0;
+  var endIndex = -1;
+
+  // Find buffer indices
+  var offset = 0;
+  for (var i = 0; i < this.buffers.length; i++) {
+    var buf = this.buffers[i];
+    var next = offset + buf.length;
+
+    // Found the start
+    if (start >= offset && start <= next) {
+      startIndex = i;
+      startOffset = start - offset;
+      if (endIndex !== -1)
+        break;
     }
-    sendMessage("Invalid");
-  },
-  /**
-   * @param {string} hash
-   */
-  hash: function hash(_hash) {
-    status.previousHash = status.currentHash;
-    status.currentHash = _hash;
-  },
-  logging: setAllLogLevel,
-  /**
-   * @param {boolean} value
-   */
-  overlay: function overlay(value) {
-    if (typeof document === "undefined") {
-      return;
+    if (end >= offset && end <= next) {
+      endIndex = i;
+      if (startIndex !== -1)
+        break;
     }
-    options.overlay = value;
-  },
-  /**
-   * @param {number} value
-   */
-  reconnect: function reconnect(value) {
-    if (parsedResourceQuery.reconnect === "false") {
-      return;
+
+    offset = next;
+  }
+
+  res.last = this.buffers[startIndex];
+  res.offset = startOffset;
+  res.maxSize = end - start;
+
+  // Multi-buffer slice
+  if (startIndex < endIndex) {
+    res.sliceQueue = this.buffers.slice(startIndex + 1, endIndex + 1);
+
+    res.last = res.last.slice(res.offset);
+    res.offset = 0;
+  }
+
+  res.avail = res.last.length - res.offset;
+  res.buffers.push(res.last);
+
+  return res;
+};
+
+WBuf.prototype.skip = function skip(n) {
+  if (n === 0)
+    return this.slice(this.size, this.size);
+
+  this._ensure(n);
+
+  var left = n;
+  while (left > 0) {
+    var toSkip = Math.min(left, this.avail);
+    left -= toSkip;
+    this.size += toSkip;
+    if (toSkip === this.avail) {
+      if (left !== 0) {
+        this._next();
+      } else {
+        this.avail -= toSkip;
+        this.offset += toSkip;
+      }
+    } else {
+      this.offset += toSkip;
+      this.avail -= toSkip;
     }
-    options.reconnect = value;
-  },
-  /**
-   * @param {boolean} value
-   */
-  progress: function progress(value) {
-    options.progress = value;
-  },
-  /**
-   * @param {{ pluginName?: string, percent: number, msg: string }} data
-   */
-  "progress-update": function progressUpdate(data) {
-    if (options.progress) {
-      log.info("".concat(data.pluginName ? "[".concat(data.pluginName, "] ") : "").concat(data.percent, "% - ").concat(data.msg, "."));
-    }
-    sendMessage("Progress", data);
-  },
-  "still-ok": function stillOk() {
-    log.info("Nothing changed.");
-    if (options.overlay) {
-      overlay.send({
-        type: "DISMISS"
-      });
-    }
-    sendMessage("StillOk");
-  },
-  ok: function ok() {
-    sendMessage("Ok");
-    if (options.overlay) {
-      overlay.send({
-        type: "DISMISS"
-      });
-    }
-    reloadApp(options, status);
-  },
-  // TODO: remove in v5 in favor of 'static-changed'
-  /**
-   * @param {string} file
-   */
-  "content-changed": function contentChanged(file) {
-    log.info("".concat(file ? "\"".concat(file, "\"") : "Content", " from static directory was changed. Reloading..."));
-    self.location.reload();
-  },
-  /**
-   * @param {string} file
-   */
-  "static-changed": function staticChanged(file) {
-    log.info("".concat(file ? "\"".concat(file, "\"") : "Content", " from static directory was changed. Reloading..."));
-    self.location.reload();
-  },
-  /**
-   * @param {Error[]} warnings
-   * @param {any} params
-   */
-  warnings: function warnings(_warnings, params) {
-    log.warn("Warnings while compiling.");
-    var printableWarnings = _warnings.map(function (error) {
-      var _formatProblem = formatProblem("warning", error),
-        header = _formatProblem.header,
-        body = _formatProblem.body;
-      return "".concat(header, "\n").concat(stripAnsi(body));
-    });
-    sendMessage("Warnings", printableWarnings);
-    for (var i = 0; i < printableWarnings.length; i++) {
-      log.warn(printableWarnings[i]);
-    }
-    var needShowOverlayForWarnings = typeof options.overlay === "boolean" ? options.overlay : options.overlay && options.overlay.warnings;
-    if (needShowOverlayForWarnings) {
-      overlay.send({
-        type: "BUILD_ERROR",
-        level: "warning",
-        messages: _warnings
-      });
-    }
-    if (params && params.preventReloading) {
-      return;
-    }
-    reloadApp(options, status);
-  },
-  /**
-   * @param {Error[]} errors
-   */
-  errors: function errors(_errors) {
-    log.error("Errors while compiling. Reload prevented.");
-    var printableErrors = _errors.map(function (error) {
-      var _formatProblem2 = formatProblem("error", error),
-        header = _formatProblem2.header,
-        body = _formatProblem2.body;
-      return "".concat(header, "\n").concat(stripAnsi(body));
-    });
-    sendMessage("Errors", printableErrors);
-    for (var i = 0; i < printableErrors.length; i++) {
-      log.error(printableErrors[i]);
-    }
-    var needShowOverlayForErrors = typeof options.overlay === "boolean" ? options.overlay : options.overlay && options.overlay.errors;
-    if (needShowOverlayForErrors) {
-      overlay.send({
-        type: "BUILD_ERROR",
-        level: "error",
-        messages: _errors
-      });
-    }
-  },
-  /**
-   * @param {Error} error
-   */
-  error: function error(_error) {
-    log.error(_error);
-  },
-  close: function close() {
-    log.info("Disconnected!");
-    if (options.overlay) {
-      overlay.send({
-        type: "DISMISS"
-      });
-    }
-    sendMessage("Close");
+  }
+
+  this._rangeCheck();
+
+  return this.slice(this.size - n, this.size);
+};
+
+WBuf.prototype.write = function write(str) {
+  var len = 0;
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    if (c > 255)
+      len += 2;
+    else
+      len += 1;
+  }
+  this.reserve(len);
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    var hi = c >>> 8;
+    var lo = c & 0xff;
+
+    if (hi)
+      this.writeUInt8(hi);
+    this.writeUInt8(lo);
   }
 };
-var socketURL = createSocketURL(parsedResourceQuery);
-socket(socketURL, onSocketMessage, options.reconnect);
+
+WBuf.prototype.copyFrom = function copyFrom(buf, start, end) {
+  var off = start === undefined ? 0 : start;
+  var len = end === undefined ? buf.length : end;
+  if (off === len)
+    return;
+
+  this._ensure(len - off);
+  while (off < len) {
+    var toCopy = Math.min(len - off, this.avail);
+    buf.copy(this.last, this.offset, off, off + toCopy);
+    off += toCopy;
+    this.size += toCopy;
+    if (toCopy === this.avail) {
+      if (off !== len) {
+        this._next();
+      } else {
+        this.avail = 0;
+        this.offset += toCopy;
+      }
+    } else {
+      this.offset += toCopy;
+      this.avail -= toCopy;
+    }
+  }
+
+  this._rangeCheck();
+};
+
+WBuf.prototype.writeUInt8 = function writeUInt8(v) {
+  this._ensure(1);
+
+  this.last[this.offset++] = v;
+  this.avail--;
+  this._move(1);
+};
+
+WBuf.prototype.writeUInt16BE = function writeUInt16BE(v) {
+  this._ensure(2);
+
+  // Fast case - everything fits into the last buffer
+  if (this.avail >= 2) {
+    this.last.writeUInt16BE(v, this.offset);
+    this.offset += 2;
+    this.avail -= 2;
+
+  // One byte here, one byte there
+  } else {
+    this.last[this.offset] = (v >>> 8);
+    this._next();
+    this.last[this.offset++] = v & 0xff;
+    this.avail--;
+  }
+
+  this._move(2);
+};
+
+WBuf.prototype.writeUInt24BE = function writeUInt24BE(v) {
+  this._ensure(3);
+
+  // Fast case - everything fits into the last buffer
+  if (this.avail >= 3) {
+    this.last.writeUInt16BE(v >>> 8, this.offset);
+    this.last[this.offset + 2] = v & 0xff;
+    this.offset += 3;
+    this.avail -= 3;
+    this._move(3);
+
+  // Two bytes here
+  } else if (this.avail >= 2) {
+    this.last.writeUInt16BE(v >>> 8, this.offset);
+    this._next();
+    this.last[this.offset++] = v & 0xff;
+    this.avail--;
+    this._move(3);
+
+  // Just one byte here
+  } else {
+    this.last[this.offset] = v >>> 16;
+    this._move(1);
+    this._next();
+    this.writeUInt16BE(v & 0xffff);
+  }
+};
+
+WBuf.prototype.writeUInt32BE = function writeUInt32BE(v) {
+  this._ensure(4);
+
+  // Fast case - everything fits into the last buffer
+  if (this.avail >= 4) {
+    this.last.writeUInt32BE(v, this.offset);
+    this.offset += 4;
+    this.avail -= 4;
+    this._move(4);
+
+  // Three bytes here
+  } else if (this.avail >= 3) {
+    this.writeUInt24BE(v >>> 8);
+    this._next();
+    this.last[this.offset++] = v & 0xff;
+    this.avail--;
+    this._move(1);
+
+  // Slow case, who cares
+  } else {
+    this.writeUInt16BE(v >>> 16);
+    this.writeUInt16BE(v & 0xffff);
+  }
+};
+
+WBuf.prototype.writeUInt16LE = function writeUInt16LE(num) {
+  var r = ((num & 0xff) << 8) | (num >>> 8);
+  this.writeUInt16BE(r);
+};
+
+WBuf.prototype.writeUInt24LE = function writeUInt24LE(num) {
+  var r = ((num & 0xff) << 16) | (((num >>> 8) & 0xff) << 8) | (num >>> 16);
+  this.writeUInt24BE(r);
+};
+
+WBuf.prototype.writeUInt32LE = function writeUInt32LE(num) {
+  this._ensure(4);
+
+  // Fast case - everything fits into the last buffer
+  if (this.avail >= 4) {
+    this.last.writeUInt32LE(num, this.offset);
+    this.offset += 4;
+    this.avail -= 4;
+    this._move(4);
+
+  // Three bytes here
+  } else if (this.avail >= 3) {
+    this.writeUInt24LE(num & 0xffffff);
+    this._next();
+    this.last[this.offset++] = num >>> 24;
+    this.avail--;
+    this._move(1);
+
+  // Slow case, who cares
+  } else {
+    this.writeUInt16LE(num & 0xffff);
+    this.writeUInt16LE(num >>> 16);
+  }
+};
+
+WBuf.prototype.render = function render() {
+  var left = this.size;
+  var out = [];
+
+  for (var i = 0; i < this.buffers.length && left >= 0; i++) {
+    var buf = this.buffers[i];
+    left -= buf.length;
+    if (left >= 0) {
+      out.push(buf);
+    } else {
+      out.push(buf.slice(0, buf.length + left));
+    }
+  }
+
+  return out;
+};
+
+// Signed APIs
+WBuf.prototype.writeInt8 = function writeInt8(num) {
+  if (num < 0)
+    return this.writeUInt8(0x100 + num);
+  else
+    return this.writeUInt8(num);
+};
+
+function toUnsigned16(num) {
+  if (num < 0)
+    return 0x10000 + num;
+  else
+    return num;
+}
+
+WBuf.prototype.writeInt16LE = function writeInt16LE(num) {
+  this.writeUInt16LE(toUnsigned16(num));
+};
+
+WBuf.prototype.writeInt16BE = function writeInt16BE(num) {
+  this.writeUInt16BE(toUnsigned16(num));
+};
+
+function toUnsigned24(num) {
+  if (num < 0)
+    return 0x1000000 + num;
+  else
+    return num;
+}
+
+WBuf.prototype.writeInt24LE = function writeInt24LE(num) {
+  this.writeUInt24LE(toUnsigned24(num));
+};
+
+WBuf.prototype.writeInt24BE = function writeInt24BE(num) {
+  this.writeUInt24BE(toUnsigned24(num));
+};
+
+function toUnsigned32(num) {
+  if (num < 0)
+    return (0xffffffff + num) + 1;
+  else
+    return num;
+}
+
+WBuf.prototype.writeInt32LE = function writeInt32LE(num) {
+  this.writeUInt32LE(toUnsigned32(num));
+};
+
+WBuf.prototype.writeInt32BE = function writeInt32BE(num) {
+  this.writeUInt32BE(toUnsigned32(num));
+};
+
+WBuf.prototype.writeComb = function writeComb(size, endian, value) {
+  if (size === 1)
+    return this.writeUInt8(value);
+
+  if (endian === 'le') {
+    if (size === 2)
+      this.writeUInt16LE(value);
+    else if (size === 3)
+      this.writeUInt24LE(value);
+    else if (size === 4)
+      this.writeUInt32LE(value);
+  } else {
+    if (size === 2)
+      this.writeUInt16BE(value);
+    else if (size === 3)
+      this.writeUInt24BE(value);
+    else if (size === 4)
+      this.writeUInt32BE(value);
+  }
+};
