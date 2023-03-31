@@ -1,30 +1,39 @@
 {
-  "name": "unquote",
-  "version": "1.1.1",
-  "description": "Remove wrapping quotes from a string.",
+  "name": "unicode-match-property-value-ecmascript",
+  "version": "2.1.0",
+  "description": "Match a Unicode property or property alias to its canonical property name per the algorithm used for RegExp Unicode property escapes in ECMAScript.",
+  "homepage": "https://github.com/mathiasbynens/unicode-match-property-value-ecmascript",
   "main": "index.js",
-  "scripts": {
-    "test": "node test/*"
+  "engines": {
+    "node": ">=4"
   },
-  "author": "Cameron Lakenen <cameron@lakenen.com>",
+  "files": [
+    "LICENSE-MIT.txt",
+    "data/mappings.js",
+    "index.js"
+  ],
+  "keywords": [
+    "unicode",
+    "unicode property values",
+    "unicode property value aliases"
+  ],
   "license": "MIT",
-  "devDependencies": {
-    "tape": "^2.13.4"
-  },
-  "directories": {
-    "test": "test"
+  "author": {
+    "name": "Mathias Bynens",
+    "url": "https://mathiasbynens.be/"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lakenen/node-unquote.git"
+    "url": "https://github.com/mathiasbynens/unicode-match-property-value-ecmascript.git"
   },
-  "bugs": {
-    "url": "https://github.com/lakenen/node-unquote/issues"
+  "bugs": "https://github.com/mathiasbynens/unicode-match-property-value-ecmascript/issues",
+  "devDependencies": {
+    "ava": "*",
+    "jsesc": "^3.0.2",
+    "unicode-property-value-aliases-ecmascript": "^2.1.0"
   },
-  "homepage": "https://github.com/lakenen/node-unquote",
-  "keywords": [
-    "string",
-    "unquote",
-    "quotes"
-  ]
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "ava tests/tests.js"
+  }
 }

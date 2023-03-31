@@ -1,14 +1,19 @@
-var reg = /[\'\"]/
+'use strict';
 
-module.exports = function unquote(str) {
-  if (!str) {
-    return ''
-  }
-  if (reg.test(str.charAt(0))) {
-    str = str.substr(1)
-  }
-  if (reg.test(str.charAt(str.length - 1))) {
-    str = str.substr(0, str.length - 1)
-  }
-  return str
-}
+const propertyToValueAliases = require('./data/mappings.js');
+
+const matchPropertyValue = function(property, value) {
+	const aliasToValue = propertyToValueAliases.get(property);
+	if (!aliasToValue) {
+		throw new Error(`Unknown property \`${ property }\`.`);
+	}
+	const canonicalValue = aliasToValue.get(value);
+	if (canonicalValue) {
+		return canonicalValue;
+	}
+	throw new Error(
+		`Unknown value \`${ value }\` for property \`${ property }\`.`
+	);
+};
+
+module.exports = matchPropertyValue;
