@@ -1,8 +1,25 @@
-import { BroadcastCacheUpdate, BroadcastCacheUpdateOptions } from './BroadcastCacheUpdate.js';
-import { BroadcastUpdatePlugin } from './BroadcastUpdatePlugin.js';
-import { responsesAreSame } from './responsesAreSame.js';
+import { BackgroundSyncPlugin } from './BackgroundSyncPlugin.js';
+import { Queue, QueueOptions } from './Queue.js';
+import { QueueStore } from './QueueStore.js';
+import { StorableRequest } from './StorableRequest.js';
 import './_version.js';
+interface SyncManager {
+    getTags(): Promise<string[]>;
+    register(tag: string): Promise<void>;
+}
+declare global {
+    interface ServiceWorkerRegistration {
+        readonly sync: SyncManager;
+    }
+    interface SyncEvent extends ExtendableEvent {
+        readonly lastChance: boolean;
+        readonly tag: string;
+    }
+    interface ServiceWorkerGlobalScopeEventMap {
+        sync: SyncEvent;
+    }
+}
 /**
- * @module workbox-broadcast-update
+ * @module workbox-background-sync
  */
-export { BroadcastCacheUpdate, BroadcastCacheUpdateOptions, BroadcastUpdatePlugin, responsesAreSame, };
+export { BackgroundSyncPlugin, Queue, QueueOptions, QueueStore, StorableRequest };

@@ -6,21 +6,22 @@
   https://opensource.org/licenses/MIT.
 */
 
-import {copyWorkboxLibraries} from './lib/copy-workbox-libraries';
-import {getModuleURL} from './lib/cdn-utils';
-import {generateSW} from './generate-sw';
-import {getManifest} from './get-manifest';
-import {injectManifest} from './inject-manifest';
+import {
+  BroadcastCacheUpdate,
+  BroadcastCacheUpdateOptions,
+} from './BroadcastCacheUpdate.js';
+import {BroadcastUpdatePlugin} from './BroadcastUpdatePlugin.js';
+import {responsesAreSame} from './responsesAreSame.js';
+
+import './_version.js';
 
 /**
- * @module workbox-build
+ * @module workbox-broadcast-update
  */
-export {
-  copyWorkboxLibraries,
-  generateSW,
-  getManifest,
-  getModuleURL,
-  injectManifest,
-};
 
-export * from './types';
+export {
+  BroadcastCacheUpdate,
+  BroadcastCacheUpdateOptions,
+  BroadcastUpdatePlugin,
+  responsesAreSame,
+};

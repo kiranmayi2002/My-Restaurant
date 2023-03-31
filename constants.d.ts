@@ -1,10 +1,5 @@
 import '../_version.js';
-export declare const QUEUE_NAME = "workbox-google-analytics";
-export declare const MAX_RETENTION_TIME: number;
-export declare const GOOGLE_ANALYTICS_HOST = "www.google-analytics.com";
-export declare const GTM_HOST = "www.googletagmanager.com";
-export declare const ANALYTICS_JS_PATH = "/analytics.js";
-export declare const GTAG_JS_PATH = "/gtag/js";
-export declare const GTM_JS_PATH = "/gtm.js";
-export declare const COLLECT_DEFAULT_PATH = "/collect";
-export declare const COLLECT_PATHS_REGEX: RegExp;
+export declare const CACHE_UPDATED_MESSAGE_TYPE = "CACHE_UPDATED";
+export declare const CACHE_UPDATED_MESSAGE_META = "workbox-broadcast-update";
+export declare const NOTIFY_ALL_CLIENTS = true;
+export declare const DEFAULT_HEADERS_TO_CHECK: string[];

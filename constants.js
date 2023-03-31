@@ -6,16 +6,11 @@
   https://opensource.org/licenses/MIT.
 */
 import '../_version.js';
-export const QUEUE_NAME = 'workbox-google-analytics';
-export const MAX_RETENTION_TIME = 60 * 48; // Two days in minutes
-export const GOOGLE_ANALYTICS_HOST = 'www.google-analytics.com';
-export const GTM_HOST = 'www.googletagmanager.com';
-export const ANALYTICS_JS_PATH = '/analytics.js';
-export const GTAG_JS_PATH = '/gtag/js';
-export const GTM_JS_PATH = '/gtm.js';
-export const COLLECT_DEFAULT_PATH = '/collect';
-// This RegExp matches all known Measurement Protocol single-hit collect
-// endpoints. Most of the time the default path (/collect) is used, but
-// occasionally an experimental endpoint is used when testing new features,
-// (e.g. /r/collect or /j/collect)
-export const COLLECT_PATHS_REGEX = /^\/(\w+\/)?collect/;
+export const CACHE_UPDATED_MESSAGE_TYPE = 'CACHE_UPDATED';
+export const CACHE_UPDATED_MESSAGE_META = 'workbox-broadcast-update';
+export const NOTIFY_ALL_CLIENTS = true;
+export const DEFAULT_HEADERS_TO_CHECK = [
+    'content-length',
+    'etag',
+    'last-modified',
+];

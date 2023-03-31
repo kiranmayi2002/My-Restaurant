@@ -5,11 +5,12 @@
   license that can be found in the LICENSE file or at
   https://opensource.org/licenses/MIT.
 */
-import { BroadcastCacheUpdate, } from './BroadcastCacheUpdate.js';
-import { BroadcastUpdatePlugin } from './BroadcastUpdatePlugin.js';
-import { responsesAreSame } from './responsesAreSame.js';
+import { BackgroundSyncPlugin } from './BackgroundSyncPlugin.js';
+import { Queue } from './Queue.js';
+import { QueueStore } from './QueueStore.js';
+import { StorableRequest } from './StorableRequest.js';
 import './_version.js';
 /**
- * @module workbox-broadcast-update
+ * @module workbox-background-sync
  */
-export { BroadcastCacheUpdate, BroadcastUpdatePlugin, responsesAreSame, };
+export { BackgroundSyncPlugin, Queue, QueueStore, StorableRequest };
