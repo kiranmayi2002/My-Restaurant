@@ -1,16 +1,44 @@
-/*
-  Copyright 2018 Google LLC
+"use strict";
 
-  Use of this source code is governed by an MIT-style
-  license that can be found in the LICENSE file or at
-  https://opensource.org/licenses/MIT.
-*/
-import '../_version.js';
-export const CACHE_UPDATED_MESSAGE_TYPE = 'CACHE_UPDATED';
-export const CACHE_UPDATED_MESSAGE_META = 'workbox-broadcast-update';
-export const NOTIFY_ALL_CLIENTS = true;
-export const DEFAULT_HEADERS_TO_CHECK = [
-    'content-length',
-    'etag',
-    'last-modified',
-];
+module.exports.NAMESPACES = {
+  HTML: "http://www.w3.org/1999/xhtml",
+  XML: "http://www.w3.org/XML/1998/namespace",
+  XMLNS: "http://www.w3.org/2000/xmlns/"
+};
+
+module.exports.NODE_TYPES = {
+  ELEMENT_NODE: 1,
+  ATTRIBUTE_NODE: 2, // historical
+  TEXT_NODE: 3,
+  CDATA_SECTION_NODE: 4,
+  ENTITY_REFERENCE_NODE: 5, // historical
+  ENTITY_NODE: 6, // historical
+  PROCESSING_INSTRUCTION_NODE: 7,
+  COMMENT_NODE: 8,
+  DOCUMENT_NODE: 9,
+  DOCUMENT_TYPE_NODE: 10,
+  DOCUMENT_FRAGMENT_NODE: 11,
+  NOTATION_NODE: 12 // historical
+};
+
+module.exports.VOID_ELEMENTS = new Set([
+  "area",
+  "base",
+  "basefont",
+  "bgsound",
+  "br",
+  "col",
+  "embed",
+  "frame",
+  "hr",
+  "img",
+  "input",
+  "keygen",
+  "link",
+  "menuitem",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr"
+]);
