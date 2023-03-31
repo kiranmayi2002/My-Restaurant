@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-export {getCLS} from './getCLS.js';
-export {getFCP} from './getFCP.js';
-export {getFID} from './getFID.js';
-export {getLCP} from './getLCP.js';
-export {getTTFB} from './getTTFB.js';
+import {firstInputPolyfill, resetFirstInputPolyfill} from './lib/polyfills/firstInputPolyfill.js';
+import {getFirstHiddenTime} from './lib/polyfills/getFirstHiddenTimePolyfill.js';
 
-export * from './types.js';
+resetFirstInputPolyfill();
+self.webVitals = {
+  firstInputPolyfill: firstInputPolyfill,
+  resetFirstInputPolyfill: resetFirstInputPolyfill,
+  get firstHiddenTime() {
+    return getFirstHiddenTime();
+  },
+};

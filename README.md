@@ -1,740 +1,345 @@
-# `web-vitals`
+<div align="center">
+  <a href="https://github.com/webpack/webpack">
+    <img width="200" height="200" src="https://webpack.js.org/assets/icon-square-big.svg">
+  </a>
+</div>
 
-- [Overview](#overview)
-- [Install and load the library](#installation)
-  - [From npm](#import-web-vitals-from-npm)
-  - [From a CDN](#load-web-vitals-from-a-cdn)
+[![npm][npm]][npm-url]
+[![node][node]][node-url]
+[![tests][tests]][tests-url]
+[![coverage][cover]][cover-url]
+[![chat][chat]][chat-url]
+[![downloads][downloads]][npm-url]
+[![contributors][contributors]][contributors-url]
+
+# webpack-dev-server
+
+Use [webpack](https://webpack.js.org) with a development server that provides
+live reloading. This should be used for **development only**.
+
+It uses [webpack-dev-middleware][middleware-url] under the hood, which provides
+fast in-memory access to the webpack assets.
+
+## Table of Contents
+
+- [Getting Started](#getting-started)
 - [Usage](#usage)
-  - [Basic usage](#basic-usage)
-  - [Report the value on every change](#report-the-value-on-every-change)
-  - [Report only the delta of changes](#report-only-the-delta-of-changes)
-  - [Send the results to an analytics endpoint](#send-the-results-to-an-analytics-endpoint)
-  - [Send the results to Google Analytics](#send-the-results-to-google-analytics)
-  - [Send the results to Google Tag Manager](#send-the-results-to-google-tag-manager)
-  - [Batch multiple reports together](#batch-multiple-reports-together)
-- [Bundle versions](#bundle-versions)
-  - [Which bundle is right for you?](#which-bundle-is-right-for-you)
-  - [How the polyfill works](#how-the-polyfill-works)
-- [API](#api)
-  - [Types](#types)
-  - [Functions](#functions)
+  - [With the CLI](#with-the-cli)
+  - [With NPM Scripts](#with-npm-scripts)
+  - [With the API](#with-the-api)
+  - [With TypeScript](#with-typescript)
+  - [The Result](#the-result)
 - [Browser Support](#browser-support)
-- [Limitations](#limitations)
-- [Development](#development)
-- [Integrations](#integrations)
+- [Support](#support)
+- [Contributing](#contributing)
+- [Attribution](#attribution)
 - [License](#license)
 
-## Overview
+## Getting Started
 
-The `web-vitals` library is a tiny (~1K), modular library for measuring all the [Web Vitals](https://web.dev/vitals/) metrics on real users, in a way that accurately matches how they're measured by Chrome and reported to other Google tools (e.g. [Chrome User Experience Report](https://developers.google.com/web/tools/chrome-user-experience-report), [Page Speed Insights](https://developers.google.com/speed/pagespeed/insights/), [Search Console's Speed Report](https://webmasters.googleblog.com/2019/11/search-console-speed-report.html)).
+First things first, install the module:
 
-The library supports all of the [Core Web Vitals](https://web.dev/vitals/#core-web-vitals) as well as all of the [other Web Vitals](https://web.dev/vitals/#other-web-vitals) that can be measured [in the field](https://web.dev/user-centric-performance-metrics/#how-metrics-are-measured):
-
-### Core Web Vitals
-
-- [Cumulative Layout Shift (CLS)](https://web.dev/cls/)
-- [First Input Delay (FID)](https://web.dev/fid/)
-- [Largest Contentful Paint (LCP)](https://web.dev/lcp/)
-
-### Other Web Vitals
-
-- [First Contentful Paint (FCP)](https://web.dev/fcp/)
-- [Time to First Byte (TTFB)](https://web.dev/ttfb/)
-
-<a name="installation"><a>
-<a name="load-the-library"><a>
-
-## Install and load the library
-
-<a name="import-web-vitals-from-npm"><a>
-
-### From npm
-
-You can install this library from npm by running:
-
-```sh
-npm install web-vitals
+```console
+npm install webpack-dev-server --save-dev
 ```
 
-_**Note:** If you're not using npm, you can still load `web-vitals` via `<script>` tags from a CDN like [unpkg.com](https://unpkg.com). See the [load `web-vitals` from a CDN](#load-web-vitals-from-a-cdn) usage example below for details._
+or
 
-There are two different versions of the `web-vitals` library (the "standard" version and the "base+polyfill" version), and how you load the library depends on which version you want to use.
-
-For details on the difference between the two versions, see <a href="#which-bundle-is-right-for-you">which bundle is right for you</a>.
-
-**1. The "standard" version**
-
-To load the "standard" version, import modules from the `web-vitals` package in your application code (as you would with any npm package and node-based build tool):
-
-```js
-import {getLCP, getFID, getCLS} from 'web-vitals';
-
-getCLS(console.log);
-getFID(console.log);
-getLCP(console.log);
+```console
+yarn add -D webpack-dev-server
 ```
 
-<a name="how-to-use-the-polyfill"><a>
+or
 
-**2. The "base+polyfill" version**
-
-Loading the "base+polyfill" version is a two-step process:
-
-First, in your application code, import the "base" build rather than the "standard" build. To do this, change any `import` statements that reference `web-vitals` to `web-vitals/base`:
-
-```diff
-- import {getLCP, getFID, getCLS} from 'web-vitals';
-+ import {getLCP, getFID, getCLS} from 'web-vitals/base';
+```console
+pnpm add -D webpack-dev-server
 ```
 
-Then, inline the code from `dist/polyfill.js` into the `<head>` of your pages. This step is important since the "base" build will error if the polyfill code has not been added.
-
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <script>
-      // Inline code from `dist/polyfill.js` here
-    </script>
-  </head>
-  <body>
-    ...
-  </body>
-</html>
-```
-
-Note that the code _must_ go in the `<head>` of your pages in order to work. See [how the polyfill works](#how-the-polyfill-works) for more details.
-
-_**Tip:** while it's certainly possible to inline the code in `dist/polyfill.js` by copy and pasting it directly into your templates, it's better to automate this process in a build step—otherwise you risk the "base" and the "polyfill" scripts getting out of sync when new versions are released._
-
-<a name="load-web-vitals-from-a-cdn"><a>
-
-### From a CDN
-
-The recommended way to use the `web-vitals` package is to install it from npm and integrate it into your build process. However, if you're not using npm, it's still possible to use `web-vitals` by requesting it from a CDN that serves npm package files.
-
-The following examples show how to load `web-vitals` from [unpkg.com](https://unpkg.com), whether your targeting just Chromium-based browsers (using the "standard" version) or additional browsers (using the "base+polyfill" version):
-
-**Load the "standard" version** _(using a module script)_
-
-```html
-<!-- Append the `?module` param to load the module version of `web-vitals` -->
-<script type="module">
-  import {getCLS, getFID, getLCP} from 'https://unpkg.com/web-vitals?module';
-
-  getCLS(console.log);
-  getFID(console.log);
-  getLCP(console.log);
-</script>
-```
-
-**Load the "standard" version** _(using a classic script)_
-
-```html
-<script>
-(function() {
-  var script = document.createElement('script');
-  script.src = 'https://unpkg.com/web-vitals/dist/web-vitals.iife.js';
-  script.onload = function() {
-    // When loading `web-vitals` using a classic script, all the public
-    // methods can be found on the `webVitals` global namespace.
-    webVitals.getCLS(console.log);
-    webVitals.getFID(console.log);
-    webVitals.getLCP(console.log);
-  }
-  document.head.appendChild(script);
-}())
-</script>
-```
-
-**Load the "base+polyfill" version** _(using a classic script)_
-
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <script>
-      // Inline code from `https://unpkg.com/web-vitals/dist/polyfill.js` here.
-    </script>
-  </head>
-  <body>
-    ...
-    <!-- Load the UMD version of the "base" bundle. -->
-    <script>
-    (function() {
-      var script = document.createElement('script');
-      script.src = 'https://unpkg.com/web-vitals/dist/web-vitals.base.iife.js';
-      script.onload = function() {
-        // When loading `web-vitals` using a classic script, all the public
-        // methods can be found on the `webVitals` global namespace.
-        webVitals.getCLS(console.log);
-        webVitals.getFID(console.log);
-        webVitals.getLCP(console.log);
-      }
-      document.head.appendChild(script);
-    }())
-    </script>
-  </body>
-</html>
-```
+_Note: While you can install and run webpack-dev-server globally, we recommend
+installing it locally. webpack-dev-server will always use a local installation
+over a global one._
 
 ## Usage
 
-### Basic usage
+There are two main, recommended methods of using the module:
 
-Each of the Web Vitals metrics is exposed as a single function that takes an `onReport` callback. This callback will be called any time the metric value is available and ready to be reported.
+### With the CLI
 
-The following example measures each of the Core Web Vitals metrics and logs the result to the console once its value is ready to report.
+The easiest way to use it is with the [webpack CLI](https://webpack.js.org/api/cli/). In the directory where your
+`webpack.config.js` is, run:
 
-_(The examples below import the "standard" version, but they will work with the polyfill version as well.)_
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-getCLS(console.log);
-getFID(console.log);
-getLCP(console.log);
+```console
+npx webpack serve
 ```
 
-Note that some of these metrics will not report until the user has interacted with the page, switched tabs, or the page starts to unload. If you don't see the values logged to the console immediately, try reloading the page (with [preserve log](https://developers.google.com/web/tools/chrome-devtools/console/reference#persist) enabled) or switching tabs and then switching back.
+Following options are available with `webpack serve`:
 
-Also, in some cases a metric callback may never be called:
+```
+Usage: webpack serve|server|s [entries...] [options]
 
-- FID is not reported if the user never interacts with the page.
-- FCP, FID, and LCP are not reported if the page was loaded in the background.
+Run the webpack dev server.
 
-In other cases, a metric callback may be called more than once:
+Options:
+  -c, --config <value...>                             Provide path to a webpack configuration file e.g. ./webpack.config.js.
+  --config-name <value...>                            Name of the configuration to use.
+  -m, --merge                                         Merge two or more configurations using 'webpack-merge'.
+  --env <value...>                                    Environment passed to the configuration when it is a function.
+  --node-env <value>                                  Sets process.env.NODE_ENV to the specified value.
+  --progress [value]                                  Print compilation progress during build.
+  -j, --json [value]                                  Prints result as JSON or store it in a file.
+  -d, --devtool <value>                               Determine source maps to use.
+  --no-devtool                                        Do not generate source maps.
+  --entry <value...>                                  The entry point(s) of your application e.g. ./src/main.js.
+  --mode <value>                                      Defines the mode to pass to webpack.
+  --name <value>                                      Name of the configuration. Used when loading multiple configurations.
+  -o, --output-path <value>                           Output location of the file generated by webpack e.g. ./dist/.
+  --stats [value]                                     It instructs webpack on how to treat the stats e.g. verbose.
+  --no-stats                                          Disable stats output.
+  -t, --target <value...>                             Sets the build target e.g. node.
+  --no-target                                         Negative 'target' option.
+  --watch-options-stdin                               Stop watching when stdin stream has ended.
+  --no-watch-options-stdin                            Do not stop watching when stdin stream has ended.
+  --allowed-hosts <value...>                          Allows to enumerate the hosts from which access to the dev server are allowed (useful when you are proxying dev server, by default is 'auto').
+  --allowed-hosts-reset                               Clear all items provided in 'allowedHosts' configuration. Allows to enumerate the hosts from which access to the dev server are allowed (useful when you are proxying dev server, by default is 'auto').
+  --bonjour                                           Allows to broadcasts dev server via ZeroConf networking on start.
+  --no-bonjour                                        Disallows to broadcasts dev server via ZeroConf networking on start.
+  --no-client                                         Disables client script.
+  --client-logging <value>                            Allows to set log level in the browser.
+  --client-overlay                                    Enables a full-screen overlay in the browser when there are compiler errors or warnings.
+  --no-client-overlay                                 Disables the full-screen overlay in the browser when there are compiler errors or warnings.
+  --client-overlay-errors                             Enables a full-screen overlay in the browser when there are compiler errors.
+  --no-client-overlay-errors                          Disables the full-screen overlay in the browser when there are compiler errors.
+  --client-overlay-warnings                           Enables a full-screen overlay in the browser when there are compiler warnings.
+  --no-client-overlay-warnings                        Disables the full-screen overlay in the browser when there are compiler warnings.
+  --client-overlay-trusted-types-policy-name <value>  The name of a Trusted Types policy for the overlay. Defaults to 'webpack-dev-server#overlay'.
+  --client-progress                                   Prints compilation progress in percentage in the browser.
+  --no-client-progress                                Does not print compilation progress in percentage in the browser.
+  --client-reconnect [value]                          Tells dev-server the number of times it should try to reconnect the client.
+  --no-client-reconnect                               Tells dev-server to not to try to reconnect the client.
+  --client-web-socket-transport <value>               Allows to set custom web socket transport to communicate with dev server.
+  --client-web-socket-url <value>                     Allows to specify URL to web socket server (useful when you're proxying dev server and client script does not always know where to connect to).
+  --client-web-socket-url-hostname <value>            Tells clients connected to devServer to use the provided hostname.
+  --client-web-socket-url-pathname <value>            Tells clients connected to devServer to use the provided path to connect.
+  --client-web-socket-url-password <value>            Tells clients connected to devServer to use the provided password to authenticate.
+  --client-web-socket-url-port <value>                Tells clients connected to devServer to use the provided port.
+  --client-web-socket-url-protocol <value>            Tells clients connected to devServer to use the provided protocol.
+  --client-web-socket-url-username <value>            Tells clients connected to devServer to use the provided username to authenticate.
+  --compress                                          Enables gzip compression for everything served.
+  --no-compress                                       Disables gzip compression for everything served.
+  --history-api-fallback                              Allows to proxy requests through a specified index page (by default 'index.html'), useful for Single Page Applications that utilise the HTML5 History API.
+  --no-history-api-fallback                           Disallows to proxy requests through a specified index page.
+  --host <value>                                      Allows to specify a hostname to use.
+  --hot [value]                                       Enables Hot Module Replacement.
+  --no-hot                                            Disables Hot Module Replacement.
+  --http2                                             Allows to serve over HTTP/2 using SPDY. Deprecated, use the `server` option.
+  --no-http2                                          Does not serve over HTTP/2 using SPDY.
+  --https                                             Allows to configure the server's listening socket for TLS (by default, dev server will be served over HTTP). Deprecated, use the `server` option.
+  --no-https                                          Disallows to configure the server's listening socket for TLS (by default, dev server will be served over HTTP).
+  --https-passphrase <value>                          Passphrase for a pfx file. Deprecated, use the `server.options.passphrase` option.
+  --https-request-cert                                Request for an SSL certificate. Deprecated, use the `server.options.requestCert` option.
+  --no-https-request-cert                             Does not request for an SSL certificate.
+  --https-ca <value...>                               Path to an SSL CA certificate or content of an SSL CA certificate. Deprecated, use the `server.options.ca` option.
+  --https-ca-reset                                    Clear all items provided in 'https.ca' configuration. Path to an SSL CA certificate or content of an SSL CA certificate. Deprecated, use the `server.options.ca` option.
+  --https-cacert <value...>                           Path to an SSL CA certificate or content of an SSL CA certificate. Deprecated, use the `server.options.ca` option.
+  --https-cacert-reset                                Clear all items provided in 'https.cacert' configuration. Path to an SSL CA certificate or content of an SSL CA certificate. Deprecated, use the `server.options.ca` option.
+  --https-cert <value...>                             Path to an SSL certificate or content of an SSL certificate. Deprecated, use the `server.options.cert` option.
+  --https-cert-reset                                  Clear all items provided in 'https.cert' configuration. Path to an SSL certificate or content of an SSL certificate. Deprecated, use the `server.options.cert` option.
+  --https-crl <value...>                              Path to PEM formatted CRLs (Certificate Revocation Lists) or content of PEM formatted CRLs (Certificate Revocation Lists). Deprecated, use the `server.options.crl` option.
+  --https-crl-reset                                   Clear all items provided in 'https.crl' configuration. Path to PEM formatted CRLs (Certificate Revocation Lists) or content of PEM formatted CRLs (Certificate Revocation Lists). Deprecated, use the `server.options.crl` option.
+  --https-key <value...>                              Path to an SSL key or content of an SSL key. Deprecated, use the `server.options.key` option.
+  --https-key-reset                                   Clear all items provided in 'https.key' configuration. Path to an SSL key or content of an SSL key. Deprecated, use the `server.options.key` option.
+  --https-pfx <value...>                              Path to an SSL pfx file or content of an SSL pfx file. Deprecated, use the `server.options.pfx` option.
+  --https-pfx-reset                                   Clear all items provided in 'https.pfx' configuration. Path to an SSL pfx file or content of an SSL pfx file. Deprecated, use the `server.options.pfx` option.
+  --ipc [value]                                       Listen to a unix socket.
+  --live-reload                                       Enables reload/refresh the page(s) when file changes are detected (enabled by default).
+  --no-live-reload                                    Disables reload/refresh the page(s) when file changes are detected (enabled by default).
+  --magic-html                                        Tells dev-server whether to enable magic HTML routes (routes corresponding to your webpack output, for example '/main' for 'main.js').
+  --no-magic-html                                     Disables magic HTML routes (routes corresponding to your webpack output, for example '/main' for 'main.js').
+  --open [value...]                                   Allows to configure dev server to open the browser(s) and page(s) after server had been started (set it to true to open your default browser).
+  --no-open                                           Does not open the default browser.
+  --open-target <value...>                            Opens specified page in browser.
+  --open-app-name <value...>                          Open specified browser.
+  --open-app <value...>                               Open specified browser. Deprecated: please use '--open-app-name'.
+  --open-reset                                        Clear all items provided in 'open' configuration. Allows to configure dev server to open the browser(s) and page(s) after server had been started (set it to true to open your default browser).
+  --open-target-reset                                 Clear all items provided in 'open.target' configuration. Opens specified page in browser.
+  --open-app-name-reset                               Clear all items provided in 'open.app.name' configuration. Open specified browser.
+  --port <value>                                      Allows to specify a port to use.
+  --server-type <value>                               Allows to set server and options (by default 'http').
+  --server-options-passphrase <value>                 Passphrase for a pfx file.
+  --server-options-request-cert                       Request for an SSL certificate.
+  --no-server-options-request-cert                    Does not request for an SSL certificate.
+  --server-options-ca <value...>                      Path to an SSL CA certificate or content of an SSL CA certificate.
+  --server-options-ca-reset                           Clear all items provided in 'server.options.ca' configuration. Path to an SSL CA certificate or content of an SSL CA certificate.
+  --server-options-cacert <value...>                  Path to an SSL CA certificate or content of an SSL CA certificate. Deprecated, use the `server.options.ca` option.
+  --server-options-cacert-reset                       Clear all items provided in 'server.options.cacert' configuration. Path to an SSL CA certificate or content of an SSL CA certificate. Deprecated, use the `server.options.ca` option.
+  --server-options-cert <value...>                    Path to an SSL certificate or content of an SSL certificate.
+  --server-options-cert-reset                         Clear all items provided in 'server.options.cert' configuration. Path to an SSL certificate or content of an SSL certificate.
+  --server-options-crl <value...>                     Path to PEM formatted CRLs (Certificate Revocation Lists) or content of PEM formatted CRLs (Certificate Revocation Lists).
+  --server-options-crl-reset                          Clear all items provided in 'server.options.crl' configuration. Path to PEM formatted CRLs (Certificate Revocation Lists) or content of PEM formatted CRLs (Certificate Revocation Lists).
+  --server-options-key <value...>                     Path to an SSL key or content of an SSL key.
+  --server-options-key-reset                          Clear all items provided in 'server.options.key' configuration. Path to an SSL key or content of an SSL key.
+  --server-options-pfx <value...>                     Path to an SSL pfx file or content of an SSL pfx file.
+  --server-options-pfx-reset                          Clear all items provided in 'server.options.pfx' configuration. Path to an SSL pfx file or content of an SSL pfx file.
+  --static [value...]                                 Allows to configure options for serving static files from directory (by default 'public' directory).
+  --no-static                                         Disallows to configure options for serving static files from directory.
+  --static-directory <value...>                       Directory for static contents.
+  --static-public-path <value...>                     The static files will be available in the browser under this public path.
+  --static-serve-index                                Tells dev server to use serveIndex middleware when enabled.
+  --no-static-serve-index                             Does not tell dev server to use serveIndex middleware.
+  --static-watch                                      Watches for files in static content directory.
+  --no-static-watch                                   Does not watch for files in static content directory.
+  --static-reset                                      Clear all items provided in 'static' configuration. Allows to configure options for serving static files from directory (by default 'public' directory).
+  --static-public-path-reset                          Clear all items provided in 'static.publicPath' configuration. The static files will be available in the browser under this public path.
+  --watch-files <value...>                            Allows to configure list of globs/directories/files to watch for file changes.
+  --watch-files-reset                                 Clear all items provided in 'watchFiles' configuration. Allows to configure list of globs/directories/files to watch for file changes.
+  --web-socket-server <value>                         Deprecated: please use '--web-socket-server-type' option. Allows to set web socket server and options (by default 'ws').
+  --no-web-socket-server                              Disallows to set web socket server and options.
+  --web-socket-server-type <value>                    Allows to set web socket server and options (by default 'ws').
 
-- CLS should be reported any time the [page's `visibilityState` changes to hidden](https://developers.google.com/web/updates/2018/07/page-lifecycle-api#advice-hidden).
-- CLS, FCP, FID, and LCP are reported again after a page is restored from the [back/forward cache](https://web.dev/bfcache/).
+Global options:
+  --color                                             Enable colors on console.
+  --no-color                                          Disable colors on console.
+  -v, --version                                       Output the version number of 'webpack', 'webpack-cli' and 'webpack-dev-server' and commands.
+  -h, --help [verbose]                                Display help for commands and options.
 
-_**Warning:** do not call any of the Web Vitals functions (e.g. `getCLS()`, `getFID()`, `getLCP()`) more than once per page load. Each of these functions creates a `PerformanceObserver` instance and registers event listeners for the lifetime of the page. While the overhead of calling these functions once is negligible, calling them repeatedly on the same page may eventually result in a memory leak._
+To see list of all supported commands and options run 'webpack --help=verbose'.
 
-### Report the value on every change
-
-In most cases, you only want `onReport` to be called when the metric is ready to be reported. However, it is possible to report every change (e.g. each layout shift as it happens) by setting the optional, second argument (`reportAllChanges`) to `true`.
-
-This can be useful when debugging, but in general using `reportAllChanges` is not needed (or recommended).
-
-```js
-import {getCLS} from 'web-vitals';
-
-// Logs CLS as the value changes.
-getCLS(console.log, true);
+Webpack documentation: https://webpack.js.org/.
+CLI documentation: https://webpack.js.org/api/cli/.
+Made with ♥ by the webpack team.
 ```
 
-### Report only the delta of changes
+> **Note**
+>
+> _Detailed documentation for above options is available on this [link](https://webpack.js.org/configuration/dev-server/)._
 
-Some analytics providers allow you to update the value of a metric, even after you've already sent it to their servers (overwriting the previously-sent value with the same `id`).
+### With NPM Scripts
 
-Other analytics providers, however, do not allow this, so instead of reporting the new value, you need to report only the delta (the difference between the current value and the last-reported value). You can then compute the total value by summing all metric deltas sent with the same ID.
+NPM package.json scripts are a convenient and useful means to run locally installed
+binaries without having to be concerned about their full paths. Simply define a
+script as such:
 
-The following example shows how to use the `id` and `delta` properties:
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-function logDelta({name, id, delta}) {
-  console.log(`${name} matching ID ${id} changed by ${delta}`);
-}
-
-getCLS(logDelta);
-getFID(logDelta);
-getLCP(logDelta);
-```
-
-_**Note:** the first time the `onReport` function is called, its `value` and `delta` properties will be the same._
-
-In addition to using the `id` field to group multiple deltas for the same metric, it can also be used to differentiate different metrics reported on the same page. For example, after a back/forward cache restore, a new metric object is created with a new `id` (since back/forward cache restores are considered separate page visits).
-
-### Send the results to an analytics endpoint
-
-The following example measures each of the Core Web Vitals metrics and reports them to a hypothetical `/analytics` endpoint, as soon as each is ready to be sent.
-
-The `sendToAnalytics()` function uses the [`navigator.sendBeacon()`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon) method (if available), but falls back to the [`fetch()`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) API when not.
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-function sendToAnalytics(metric) {
-  // Replace with whatever serialization method you prefer.
-  // Note: JSON.stringify will likely include more data than you need.
-  const body = JSON.stringify(metric);
-
-  // Use `navigator.sendBeacon()` if available, falling back to `fetch()`.
-  (navigator.sendBeacon && navigator.sendBeacon('/analytics', body)) ||
-      fetch('/analytics', {body, method: 'POST', keepalive: true});
-}
-
-getCLS(sendToAnalytics);
-getFID(sendToAnalytics);
-getLCP(sendToAnalytics);
-```
-
-### Send the results to Google Analytics
-
-Google Analytics does not support reporting metric distributions in any of its built-in reports; however, if you set a unique dimension value (in this case, the metric `id`, as shown in the examples below) on every metric instance that you send to Google Analytics, you can create a report yourself using the [Google Analytics Reporting API](https://developers.google.com/analytics/devguides/reporting) and any data visualization library you choose.
-
-As an example of this, the [Web Vitals Report](https://github.com/GoogleChromeLabs/web-vitals-report) is a free and open-source tool you can use to create visualizations of the Web Vitals data that you've sent to Google Analytics.
-
-[![web-vitals-report](https://user-images.githubusercontent.com/326742/101584324-3f9a0900-3992-11eb-8f2d-182f302fb67b.png)](https://github.com/GoogleChromeLabs/web-vitals-report)
-
-In order to use the [Web Vitals Report](https://github.com/GoogleChromeLabs/web-vitals-report) (or build your own custom reports using the API) you need to send your data to Google Analytics following one of the examples outlined below:
-
-#### Using `analytics.js`
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-function sendToGoogleAnalytics({name, delta, id}) {
-  // Assumes the global `ga()` function exists, see:
-  // https://developers.google.com/analytics/devguides/collection/analyticsjs
-  ga('send', 'event', {
-    eventCategory: 'Web Vitals',
-    eventAction: name,
-    // The `id` value will be unique to the current page load. When sending
-    // multiple values from the same page (e.g. for CLS), Google Analytics can
-    // compute a total by grouping on this ID (note: requires `eventLabel` to
-    // be a dimension in your report).
-    eventLabel: id,
-    // Google Analytics metrics must be integers, so the value is rounded.
-    // For CLS the value is first multiplied by 1000 for greater precision
-    // (note: increase the multiplier for greater precision if needed).
-    eventValue: Math.round(name === 'CLS' ? delta * 1000 : delta),
-    // Use a non-interaction event to avoid affecting bounce rate.
-    nonInteraction: true,
-    // Use `sendBeacon()` if the browser supports it.
-    transport: 'beacon',
-
-    // OPTIONAL: any additional params or debug info here.
-    // See: https://web.dev/debug-web-vitals-in-the-field/
-    // dimension1: '...',
-    // dimension2: '...',
-    // ...
-  });
-}
-
-getCLS(sendToGoogleAnalytics);
-getFID(sendToGoogleAnalytics);
-getLCP(sendToGoogleAnalytics);
-```
-
-#### Using `gtag.js` (Universal Analytics)
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-function sendToGoogleAnalytics({name, delta, id}) {
-  // Assumes the global `gtag()` function exists, see:
-  // https://developers.google.com/analytics/devguides/collection/gtagjs
-  gtag('event', name, {
-    event_category: 'Web Vitals',
-    // The `id` value will be unique to the current page load. When sending
-    // multiple values from the same page (e.g. for CLS), Google Analytics can
-    // compute a total by grouping on this ID (note: requires `eventLabel` to
-    // be a dimension in your report).
-    event_label: id,
-    // Google Analytics metrics must be integers, so the value is rounded.
-    // For CLS the value is first multiplied by 1000 for greater precision
-    // (note: increase the multiplier for greater precision if needed).
-    value: Math.round(name === 'CLS' ? delta * 1000 : delta),
-    // Use a non-interaction event to avoid affecting bounce rate.
-    non_interaction: true,
-
-    // OPTIONAL: any additional params or debug info here.
-    // See: https://web.dev/debug-web-vitals-in-the-field/
-    // metric_rating: 'good' | 'ni' | 'poor',
-    // debug_info: '...',
-    // ...
-  });
-}
-
-getCLS(sendToGoogleAnalytics);
-getFID(sendToGoogleAnalytics);
-getLCP(sendToGoogleAnalytics);
-```
-
-#### Using `gtag.js` (Google Analytics 4)
-
-[Google Analytics 4](https://support.google.com/analytics/answer/10089681) introduces a new Event model allowing custom parameters instead of a fixed category, action, and label. It also supports non-integer values, making it easier to measure Web Vitals metrics compared to previous versions.
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-function sendToGoogleAnalytics({name, delta, value, id}) {
-  // Assumes the global `gtag()` function exists, see:
-  // https://developers.google.com/analytics/devguides/collection/ga4
-  gtag('event', name, {
-    // Built-in params:
-    value: delta, // Use `delta` so the value can be summed.
-    // Custom params:
-    metric_id: id, // Needed to aggregate events.
-    metric_value: value, // Optional.
-    metric_delta: delta, // Optional.
-
-    // OPTIONAL: any additional params or debug info here.
-    // See: https://web.dev/debug-web-vitals-in-the-field/
-    // metric_rating: 'good' | 'ni' | 'poor',
-    // debug_info: '...',
-    // ...
-  });
-}
-
-getCLS(sendToGoogleAnalytics);
-getFID(sendToGoogleAnalytics);
-getLCP(sendToGoogleAnalytics);
-```
-
-### Send the results to Google Tag Manager
-
-The recommended way to measure Web Vitals metrics with Google Tag Manager is using the [Core Web Vitals](https://www.simoahava.com/custom-templates/core-web-vitals/) custom template tag created and maintained by [Simo Ahava](https://www.simoahava.com/).
-
-For full installation and usage instructions, see Simo's post: [Track Core Web Vitals in GA4 with Google Tag Manager](https://www.simoahava.com/analytics/track-core-web-vitals-in-ga4-with-google-tag-manager/).
-
-### Batch multiple reports together
-
-Rather than reporting each individual Web Vitals metric separately, you can minimize your network usage by batching multiple metric reports together in a single network request.
-
-However, since not all Web Vitals metrics become available at the same time, and since not all metrics are reported on every page, you cannot simply defer reporting until all metrics are available.
-
-Instead, you should keep a queue of all metrics that were reported and flush the queue whenever the page is backgrounded or unloaded:
-
-```js
-import {getCLS, getFID, getLCP} from 'web-vitals';
-
-const queue = new Set();
-function addToQueue(metric) {
-  queue.add(metric);
-}
-
-function flushQueue() {
-  if (queue.size > 0) {
-    // Replace with whatever serialization method you prefer.
-    // Note: JSON.stringify will likely include more data than you need.
-    const body = JSON.stringify([...queue]);
-
-    // Use `navigator.sendBeacon()` if available, falling back to `fetch()`.
-    (navigator.sendBeacon && navigator.sendBeacon('/analytics', body)) ||
-          fetch('/analytics', {body, method: 'POST', keepalive: true});
-
-    queue.clear();
+```json
+{
+  "scripts": {
+    "serve": "webpack serve"
   }
 }
-
-getCLS(addToQueue);
-getFID(addToQueue);
-getLCP(addToQueue);
-
-// Report all available metrics whenever the page is backgrounded or unloaded.
-addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    flushQueue();
-  }
-});
-
-// NOTE: Safari does not reliably fire the `visibilitychange` event when the
-// page is being unloaded. If Safari support is needed, you should also flush
-// the queue in the `pagehide` event.
-addEventListener('pagehide', flushQueue);
 ```
 
-_**Note:** see [the Page Lifecycle guide](https://developers.google.com/web/updates/2018/07/page-lifecycle-api#legacy-lifecycle-apis-to-avoid) for an explanation of why `visibilitychange` and `pagehide` are recommended over events like `beforeunload` and `unload`._
+And run the following in your terminal/console:
 
-## Bundle versions
+```console
+npm run serve
+```
 
-The `web-vitals` package includes builds for both the "standard" and "base+polyfill" versions, as well as different formats of each to allow developers to choose the format that best meets their needs or integrates with their architecture.
+NPM will automatically refer to the the binary in `node_modules` for you, and
+execute the file or command.
 
-The following table lists all the bundles distributed with the `web-vitals` package on npm.
+### With the API
 
-<table>
-  <tr>
-    <td width="35%">
-      <strong>Filename</strong> <em>(all within <code>dist/*</code>)</em>
-    </td>
-    <td><strong>Export</strong></td>
-    <td><strong>Description</strong></td>
-  </tr>
-  <tr>
-    <td><code>web-vitals.js</code></td>
-    <td><code>pkg.module</code></td>
-    <td>
-      <p>An ES module bundle of all metric functions, without any extra polyfills to expand browser support.</p>
-      This is the "standard" version and is the simplest way to consume this library out of the box.
-    </td>
-  </tr>
-  <tr>
-    <td><code>web-vitals.umd.js</code></td>
-    <td><code>pgk.main</code></td>
-    <td>
-      A UMD version of the <code>web-vitals.js</code> bundle (exposed on the <code>window.webVitals.*</code> namespace).
-    </td>
-  </tr>
-  <tr>
-    <td><code>web-vitals.iife.js</code></td>
-    <td>--</td>
-    <td>
-      An IIFE version of the <code>web-vitals.js</code> bundle (exposed on the <code>window.webVitals.*</code> namespace).
-    </td>
-  </tr>
-  <tr>
-    <td><code>web-vitals.base.js</code></td>
-    <td>--</td>
-    <td>
-      <p>An ES module bundle containing just the "base" part of the "base+polyfill" version.</p>
-      Use this bundle if (and only if) you've also added the <code>polyfill.js</code> script to the <code>&lt;head&gt;</code> of your pages. See <a href="#how-to-use-the-polyfill">how to use the polyfill</a> for more details.
-    </td>
-  </tr>
-    <tr>
-    <td><code>web-vitals.base.umd.js</code></td>
-    <td>--</td>
-    <td>
-      A UMD version of the <code>web-vitals.base.js</code> bundle (exposed on the <code>window.webVitals.*</code> namespace).
-    </td>
-  </tr>
-  </tr>
-    <tr>
-    <td><code>web-vitals.base.iife.js</code></td>
-    <td>--</td>
-    <td>
-      An IIFE version of the <code>web-vitals.base.js</code> bundle (exposed on the <code>window.webVitals.*</code> namespace).
-    </td>
-  </tr>
-  <tr>
-    <td><code>polyfill.js</code></td>
-    <td>--</td>
-    <td>
-      <p>The "polyfill" part of the "base+polyfill" version. This script should be used with either <code>web-vitals.base.js</code>, <code>web-vitals.base.umd.js</code>, or <code>web-vitals.base.iife.js</code> (it will not work with any script that doesn't have "base" in the filename).</p>
-      See <a href="#how-to-use-the-polyfill">how to use the polyfill</a> for more details.
-    </td>
-  </tr>
-</table>
+While it's recommended to run webpack-dev-server via the CLI, you may also choose to start a server via the API.
 
-### Which bundle is right for you?
+See the related [API documentation for `webpack-dev-server`](https://webpack.js.org/api/webpack-dev-server/).
 
-Most developers will generally want to use the "standard" bundle (either the ES module or UMD version, depending on your build system), as it's the easiest to use out of the box and integrate into existing build tools.
+### With TypeScript
 
-However, there are a few good reasons to consider using the "base+polyfill" version, for example:
-
-- FID can be measured in all browsers.
-- CLS, FCP, FID, and LCP will be more accurate in some cases (since the polyfill detects the page's initial `visibilityState` earlier).
-
-### How the polyfill works
-
-The `polyfill.js` script adds event listeners (to track FID cross-browser), and it records initial page visibility state as well as the timestamp of the first visibility change to hidden (to improve the accuracy of CLS, FCP, LCP, and FID).
-
-In order for it to work properly, the script must be the first script added to the page, and it must run before the browser renders any content to the screen. This is why it needs to be added to the `<head>` of the document.
-
-The "standard" version of the `web-vitals` library includes some of the same logic found in `polyfill.js`. To avoid duplicating that code when using the "base+polyfill" version, the `web-vitals.base.js` bundle does not include any polyfill logic, instead it coordinates with the code in `polyfill.js`, which is why the two scripts must be used together.
-
-## API
-
-### Types:
-
-#### `Metric`
+If you use TypeScript in the webpack config, you'll need to properly type `devServer` property in order to avoid TS errors (e.g. `'devServer' does not exist in type 'Configuration'`). For that use either:
 
 ```ts
-interface Metric {
-  // The name of the metric (in acronym form).
-  name: 'CLS' | 'FCP' | 'FID' | 'LCP' | 'TTFB';
+/// <reference path="node_modules/webpack-dev-server/types/lib/Server.d.ts"/>
+import type { Configuration } from "webpack";
 
-  // The current value of the metric.
-  value: number;
-
-  // The delta between the current value and the last-reported value.
-  // On the first report, `delta` and `value` will always be the same.
-  delta: number;
-
-  // A unique ID representing this particular metric that's specific to the
-  // current page. This ID can be used by an analytics tool to dedupe
-  // multiple values sent for the same metric, or to group multiple deltas
-  // together and calculate a total.
-  id: string;
-
-  // Any performance entries used in the metric value calculation.
-  // Note, entries will be added to the array as the value changes.
-  entries: (PerformanceEntry | FirstInputPolyfillEntry | NavigationTimingPolyfillEntry)[];
-}
+// Your logic
 ```
 
-#### `ReportHandler`
+Or you can import the type from `webpack-dev-server`, i.e.
 
 ```ts
-interface ReportHandler {
-  (metric: Metric): void;
-}
+import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
+import type { Configuration } from "webpack";
+
+const devServer: DevServerConfiguration = {};
+const config: Configuration = { devServer };
+
+// module.exports
+export default config;
 ```
 
-#### `FirstInputPolyfillEntry`
+### The Result
 
-When using the FID polyfill (and if the browser doesn't natively support the Event Timing API), `metric.entries` will contain an object that polyfills the `PerformanceEventTiming` entry:
+Either method will start a server instance and begin listening for connections
+from `localhost` on port `8080`.
 
-```ts
-type FirstInputPolyfillEntry = Omit<PerformanceEventTiming,
-  'processingEnd' | 'processingEnd' | 'toJSON'>
-```
+webpack-dev-server is configured by default to support live-reload of files as
+you edit your assets while the server is running.
 
-#### `FirstInputPolyfillCallback`
-
-```ts
-interface FirstInputPolyfillCallback {
-  (entry: FirstInputPolyfillEntry): void;
-}
-```
-
-#### `NavigationTimingPolyfillEntry`
-
-When calling `getTTFB()`, if the browser doesn't support the [Navigation Timing API Level 2](https://www.w3.org/TR/navigation-timing-2/) interface, it will polyfill the entry object using timings from `performance.timing`:
-
-```ts
-export type NavigationTimingPolyfillEntry = Omit<PerformanceNavigationTiming,
-  'initiatorType' | 'nextHopProtocol' | 'redirectCount' | 'transferSize' |
-  'encodedBodySize' | 'decodedBodySize' | 'toJSON'>
-```
-
-#### `WebVitalsGlobal`
-
-If using the "base+polyfill" build, the `polyfill.js` script creates the global `webVitals` namespace matching the following interface:
-
-```ts
-interface WebVitalsGlobal {
-  firstInputPolyfill: (onFirstInput: FirstInputPolyfillCallback) => void;
-  resetFirstInputPolyfill: () => void;
-  firstHiddenTime: number;
-}
-```
-
-### Functions:
-
-#### `getCLS()`
-
-```ts
-type getCLS = (onReport: ReportHandler, reportAllChanges?: boolean) => void
-```
-
-Calculates the [CLS](https://web.dev/cls/) value for the current page and calls the `onReport` function once the value is ready to be reported, along with all `layout-shift` performance entries that were used in the metric value calculation. The reported value is a [double](https://heycam.github.io/webidl/#idl-double) (corresponding to a [layout shift score](https://web.dev/cls/#layout-shift-score)).
-
-If the `reportAllChanges` param is `true`, the `onReport` function will be called any time a new `layout-shift` performance entry is dispatched, or once the final value of the metric has been determined.
-
-_**Important:** unlike other metrics, CLS continues to monitor changes for the entire lifespan of the page&mdash;including if the user returns to the page after it's been hidden/backgrounded. However, since browsers often [will not fire additional callbacks once the user has backgrounded a page](https://developers.google.com/web/updates/2018/07/page-lifecycle-api#advice-hidden), `onReport` is always called when the page's visibility state changes to hidden. As a result, the `onReport` function might be called multiple times during the same page load (see [Reporting only the delta of changes](#report-only-the-delta-of-changes) for how to manage this)._
-
-#### `getFCP()`
-
-```ts
-type getFCP = (onReport: ReportHandler, reportAllChanges?: boolean) => void
-```
-
-Calculates the [FCP](https://web.dev/fcp/) value for the current page and calls the `onReport` function once the value is ready, along with the relevant `paint` performance entry used to determine the value. The reported value is a [`DOMHighResTimeStamp`](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp).
-
-#### `getFID()`
-
-```ts
-type getFID = (onReport: ReportHandler, reportAllChanges?: boolean) => void
-```
-
-Calculates the [FID](https://web.dev/fid/) value for the current page and calls the `onReport` function once the value is ready, along with the relevant `first-input` performance entry used to determine the value (and optionally the input event if using the [FID polyfill](#fid-polyfill)). The reported value is a [`DOMHighResTimeStamp`](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp).
-
-_**Important:** since FID is only reported after the user interacts with the page, it's possible that it will not be reported for some page loads._
-
-#### `getLCP()`
-
-```ts
-type getLCP = (onReport: ReportHandler, reportAllChanges?: boolean) => void
-```
-
-Calculates the [LCP](https://web.dev/lcp/) value for the current page and calls the `onReport` function once the value is ready (along with the relevant `largest-contentful-paint` performance entries used to determine the value). The reported value is a [`DOMHighResTimeStamp`](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp).
-
-If the `reportAllChanges` param is `true`, the `onReport` function will be called any time a new `largest-contentful-paint` performance entry is dispatched, or once the final value of the metric has been determined.
-
-#### `getTTFB()`
-
-```ts
-type getTTFB = (onReport: ReportHandler, reportAllChanges?: boolean) => void
-```
-
-Calculates the [TTFB](https://web.dev/time-to-first-byte/) value for the current page and calls the `onReport` function once the page has loaded, along with the relevant `navigation` performance entry used to determine the value. The reported value is a [`DOMHighResTimeStamp`](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp).
-
-Note, this function waits until after the page is loaded to call `onReport` in order to ensure all properties of the `navigation` entry are populated. This is useful if you want to report on other metrics exposed by the [Navigation Timing API](https://w3c.github.io/navigation-timing/).
-
-For example, the TTFB metric starts from the page's [time origin](https://www.w3.org/TR/hr-time-2/#sec-time-origin), which means it [includes](https://developers.google.com/web/fundamentals/performance/navigation-and-resource-timing#the_life_and_timings_of_a_network_request) time spent on DNS lookup, connection negotiation, network latency, and unloading the previous document. If, in addition to TTFB, you want a metric that excludes these timings and _just_ captures the time spent making the request and receiving the first byte of the response, you could compute that from data found on the performance entry:
-
-```js
-import {getTTFB} from 'web-vitals';
-
-getTTFB((metric) => {
-  // Calculate the request time by subtracting from TTFB
-  // everything that happened prior to the request starting.
-  const requestTime = metric.value - metric.entries[0].requestStart;
-  console.log('Request time:', requestTime);
-});
-```
-
-_**Note:** browsers that do not support `navigation` entries will fall back to
-using `performance.timing` (with the timestamps converted from epoch time to [`DOMHighResTimeStamp`](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp)). This ensures code referencing these values (like in the example above) will work the same in all browsers._
+See [**the documentation**][docs-url] for more use cases and options.
 
 ## Browser Support
 
-The `web-vitals` code has been tested and will run without error in all major browsers as well as Internet Explorer back to version 9. However, some of the APIs required to capture these metrics are currently only available in Chromium-based browsers (e.g. Chrome, Edge, Opera, Samsung Internet).
+While `webpack-dev-server` transpiles the client (browser) scripts to an ES5
+state, the project only officially supports the _last two versions of major
+browsers_. We simply don't have the resources to support every whacky
+browser out there.
 
-Browser support for each function is as follows:
+If you find a bug with an obscure / old browser, we would actively welcome a
+Pull Request to resolve the bug.
 
-- `getCLS()`: Chromium,
-- `getFCP()`: Chromium, Firefox, Safari
-- `getFID()`: Chromium, Firefox, Safari, Internet Explorer (with the [polyfill](#how-to-use-the-polyfill))
-- `getLCP()`: Chromium
-- `getTTFB()`: Chromium, Firefox, Safari, Internet Explorer
+## Support
 
-## Limitations
+We do our best to keep issues in the repository focused on bugs, features, and
+needed modifications to the code for the module. Because of that, we ask users
+with general support, "how-to", or "why isn't this working" questions to try one
+of the other support channels that are available.
 
-The `web-vitals` library is primarily a wrapper around the Web APIs that
-measure the Web Vitals metrics, which means the limitations of those APIs will
-mostly apply to this library as well.
+Your first-stop-shop for support for webpack-dev-server should be the excellent
+[documentation][docs-url] for the module. If you see an opportunity for improvement
+of those docs, please head over to the [webpack.js.org repo][wjo-url] and open a
+pull request.
 
-The primary limitation of these APIs is they have no visibility into `<iframe>` content (not even same-origin iframes), which means pages that make use of iframes will likely see a difference between the data measured by this library and the data available in the Chrome User Experience Report (which does include iframe content).
+From there, we encourage users to visit the [webpack Gitter chat][chat-url] and
+talk to the fine folks there. If your quest for answers comes up dry in chat,
+head over to [StackOverflow][stack-url] and do a quick search or open a new
+question. Remember; It's always much easier to answer questions that include your
+`webpack.config.js` and relevant files!
 
-For same-origin iframes, it's possible to use the `web-vitals` library to measure metrics, but it's tricky because it requires the developer to add the library to every frame and `postMessage()` the results to the parent frame for aggregation.
+If you're twitter-savvy you can tweet [#webpack][hash-url] with your question
+and someone should be able to reach out and lend a hand.
 
-_**Note:** given the lack of iframe support, the `getCLS()` function technically measures [DCLS](https://github.com/wicg/layout-instability#cumulative-scores) (Document Cumulative Layout Shift) rather than CLS, if the page includes iframes)._
+If you have discovered a :bug:, have a feature suggestion, or would like to see
+a modification, please feel free to create an issue on Github. _Note: The issue
+template isn't optional, so please be sure not to remove it, and please fill it
+out completely._
 
-## Development
+## Contributing
 
-### Building the code
+We welcome your contributions! Please have a read of [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to get involved.
 
-The `web-vitals` source code is written in TypeScript. To transpile the code and build the production bundles, run the following command.
+## Attribution
 
-```sh
-npm run build
-```
-
-To build the code and watch for changes, run:
-
-```sh
-npm run watch
-```
-
-### Running the tests
-
-The `web-vitals` code is tested in real browsers using [webdriver.io](https://webdriver.io/). Use the following command to run the tests:
-
-```sh
-npm test
-```
-
-To test any of the APIs manually, you can start the test server
-
-```sh
-npm run test:server
-```
-
-Then navigate to `http://localhost:9090/test/<view>`, where `<view>` is the basename of one the templates under [/test/views/](/test/views/).
-
-You'll likely want to combine this with `npm run watch` to ensure any changes you make are transpiled and rebuilt.
-
-## Integrations
-
-- [**Web Vitals Connector**](https://goo.gle/web-vitals-connector): Data Studio connector to create dashboards from [Web Vitals data captured in BiqQuery](https://web.dev/vitals-ga4/).
-- [**Core Web Vitals Custom Tag template**](https://www.simoahava.com/custom-templates/core-web-vitals/): Custom GTM template tag to [add measurement handlers](https://www.simoahava.com/analytics/track-core-web-vitals-in-ga4-with-google-tag-manager/) for all Core Web Vitals metrics.
-- [**`web-vitals-reporter`**](https://github.com/treosh/web-vitals-reporter): JavaScript library to batch `onReport` callbacks and send data with a single request.
+This project is heavily inspired by [peerigon/nof5](https://github.com/peerigon/nof5).
 
 ## License
 
-[Apache 2.0](/LICENSE)
+#### [MIT](./LICENSE)
+
+[npm]: https://img.shields.io/npm/v/webpack-dev-server.svg
+[npm-url]: https://npmjs.com/package/webpack-dev-server
+[node]: https://img.shields.io/node/v/webpack-dev-server.svg
+[node-url]: https://nodejs.org
+[tests]: https://github.com/webpack/webpack-dev-server/workflows/webpack-dev-server/badge.svg
+[tests-url]: https://github.com/webpack/webpack-dev-server/actions?query=workflow%3Awebpack-dev-server
+[cover]: https://codecov.io/gh/webpack/webpack-dev-server/branch/master/graph/badge.svg
+[cover-url]: https://codecov.io/gh/webpack/webpack-dev-server
+[chat]: https://badges.gitter.im/webpack/webpack.svg
+[chat-url]: https://gitter.im/webpack/webpack
+[docs-url]: https://webpack.js.org/configuration/dev-server/#devserver
+[hash-url]: https://twitter.com/search?q=webpack
+[middleware-url]: https://github.com/webpack/webpack-dev-middleware
+[stack-url]: https://stackoverflow.com/questions/tagged/webpack-dev-server
+[uglify-url]: https://github.com/webpack-contrib/uglifyjs-webpack-plugin
+[wjo-url]: https://github.com/webpack/webpack.js.org
+[downloads]: https://img.shields.io/npm/dm/webpack-dev-server.svg
+[contributors-url]: https://github.com/webpack/webpack-dev-server/graphs/contributors
+[contributors]: https://img.shields.io/github/contributors/webpack/webpack-dev-server.svg

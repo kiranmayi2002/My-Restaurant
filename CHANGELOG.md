@@ -1,166 +1,142 @@
-# Changes
+### 0.7.4 / 2020-05-22
 
+- Avoid crashing if `process.version` does not contain any digits
+- Emit `ping` and `pong` events from the `Server` driver
+- Require http-parser-js >=0.5.1 which fixes the bug we addressed in 0.7.3
 
-## 2.0.2
+### 0.7.3 / 2019-06-13
 
-* Rename bin to `node-which`
+- Cap version of http-parser-js below 0.4.11, which introduced a bug that
+  prevents us from handling messages that are part of the same input buffer as
+  the handshake response if chunked encoding is specified
 
-## 2.0.1
+### 0.7.2 / 2019-06-13
 
-* generate changelog and publish on version bump
-* enforce 100% test coverage
-* Promise interface
+(This version was pulled due to an error when publishing)
 
-## 2.0.0
+### 0.7.1 / 2019-06-10
 
-* Parallel tests, modern JavaScript, and drop support for node < 8
+- Catch any exceptions produced while generating a handshake response and send a
+  `400 Bad Request` response to the client
+- Pick the RFC-6455 protocol version if the request contains any of the headers
+  used by that version
+- Use the `Buffer.alloc()` and `Buffer.from()` functions instead of the unsafe
+  `Buffer()` constructor
+- Handle errors encountered while handling malformed draft-76 requests
+- Change license from MIT to Apache 2.0
 
-## 1.3.1
+### 0.7.0 / 2017-09-11
 
-* update deps
-* update travis
+- Add `ping` and `pong` to the set of events users can listen to
+- Replace the bindings to Node's HTTP parser with `http-parser-js`
 
-## v1.3.0
+### 0.6.5 / 2016-05-20
 
-* Add nothrow option to which.sync
-* update tap
+- Don't mutate buffers passed in by the application when masking
 
-## v1.2.14
+### 0.6.4 / 2016-01-07
 
-* appveyor: drop node 5 and 0.x
-* travis-ci: add node 6, drop 0.x
+- If a number is given as input for a frame payload, send it as a string
 
-## v1.2.13
+### 0.6.3 / 2015-11-06
 
-* test: Pass missing option to pass on windows
-* update tap
-* update isexe to 2.0.0
-* neveragain.tech pledge request
+- Reject draft-76 handshakes if their Sec-WebSocket-Key headers are invalid
+- Throw a more helpful error if a client is created with an invalid URL
 
-## v1.2.12
+### 0.6.2 / 2015-07-18
 
-* Removed unused require
+- When the peer sends a close frame with no error code, emit 1000
 
-## v1.2.11
+### 0.6.1 / 2015-07-13
 
-* Prevent changelog script from being included in package
+- Use the `buffer.{read,write}UInt{16,32}BE` methods for reading/writing numbers
+  to buffers rather than including duplicate logic for this
 
-## v1.2.10
+### 0.6.0 / 2015-07-08
 
-* Use env.PATH only, not env.Path
+- Allow the parser to recover cleanly if event listeners raise an error
+- Add a `pong` method for sending unsolicited pong frames
 
-## v1.2.9
+### 0.5.4 / 2015-03-29
 
-* fix for paths starting with ../
-* Remove unused `is-absolute` module
+- Don't emit extra close frames if we receive a close frame after we already
+  sent one
+- Fail the connection when the driver receives an invalid
+  `Sec-WebSocket-Extensions` header
 
-## v1.2.8
+### 0.5.3 / 2015-02-22
 
-* bullet items in changelog that contain (but don't start with) #
+- Don't treat incoming data as WebSocket frames if a client driver is closed
+  before receiving the server handshake
 
-## v1.2.7
+### 0.5.2 / 2015-02-19
 
-* strip 'update changelog' changelog entries out of changelog
+- Fix compatibility with the HTTP parser on io.js
+- Use `websocket-extensions` to make sure messages and close frames are kept in
+  order
+- Don't emit multiple `error` events
 
-## v1.2.6
+### 0.5.1 / 2014-12-18
 
-* make the changelog bulleted
+- Don't allow drivers to be created with unrecognized options
 
-## v1.2.5
+### 0.5.0 / 2014-12-13
 
-* make a changelog, and keep it up to date
-* don't include tests in package
-* Properly handle relative-path executables
-* appveyor
-* Attach error code to Not Found error
-* Make tests pass on Windows
+- Support protocol extensions via the websocket-extensions module
 
-## v1.2.4
+### 0.4.0 / 2014-11-08
 
-* Fix typo
+- Support connection via HTTP proxies using `CONNECT`
 
-## v1.2.3
+### 0.3.6 / 2014-10-04
 
-* update isexe, fix regression in pathExt handling
+- It is now possible to call `close()` before `start()` and close the driver
 
-## v1.2.2
+### 0.3.5 / 2014-07-06
 
-* update deps, use isexe module, test windows
+- Don't hold references to frame buffers after a message has been emitted
+- Make sure that `protocol` and `version` are exposed properly by the TCP driver
 
-## v1.2.1
+### 0.3.4 / 2014-05-08
 
-* Sometimes windows PATH entries are quoted
-* Fixed a bug in the check for group and user mode bits. This bug was introduced during refactoring for supporting strict mode.
-* doc cli
+- Don't hold memory-leaking references to I/O buffers after they have been
+  parsed
 
-## v1.2.0
+### 0.3.3 / 2014-04-24
 
-* Add support for opt.all and -as cli flags
-* test the bin
-* update travis
-* Allow checking for multiple programs in bin/which
-* tap 2
+- Correct the draft-76 status line reason phrase
 
-## v1.1.2
+### 0.3.2 / 2013-12-29
 
-* travis
-* Refactored and fixed undefined error on Windows
-* Support strict mode
+- Expand `maxLength` to cover sequences of continuation frames and
+  `draft-{75,76}`
+- Decrease default maximum frame buffer size to 64MB
+- Stop parsing when the protocol enters a failure mode, to save CPU cycles
 
-## v1.1.1
+### 0.3.1 / 2013-12-03
 
-* test +g exes against secondary groups, if available
-* Use windows exe semantics on cygwin & msys
-* cwd should be first in path on win32, not last
-* Handle lower-case 'env.Path' on Windows
-* Update docs
-* use single-quotes
+- Add a `maxLength` option to limit allowed frame size
+- Don't pre-allocate a message buffer until the whole frame has arrived
+- Fix compatibility with Node v0.11 `HTTPParser`
 
-## v1.1.0
+### 0.3.0 / 2013-09-09
 
-* Add tests, depend on is-absolute
+- Support client URLs with Basic Auth credentials
 
-## v1.0.9
+### 0.2.2 / 2013-07-05
 
-* which.js: root is allowed to execute files owned by anyone
+- No functional changes, just updates to package.json
 
-## v1.0.8
+### 0.2.1 / 2013-05-17
 
-* don't use graceful-fs
+- Export the isSecureRequest() method since faye-websocket relies on it
+- Queue sent messages in the client's initial state
 
-## v1.0.7
+### 0.2.0 / 2013-05-12
 
-* add license to package.json
+- Add API for setting and reading headers
+- Add Driver.server() method for getting a driver for TCP servers
 
-## v1.0.6
+### 0.1.0 / 2013-05-04
 
-* isc license
-
-## 1.0.5
-
-* Awful typo
-
-## 1.0.4
-
-* Test for path absoluteness properly
-* win: Allow '' as a pathext if cmd has a . in it
-
-## 1.0.3
-
-* Remove references to execPath
-* Make `which.sync()` work on Windows by honoring the PATHEXT variable.
-* Make `isExe()` always return true on Windows.
-* MIT
-
-## 1.0.2
-
-* Only files can be exes
-
-## 1.0.1
-
-* Respect the PATHEXT env for win32 support
-* should 0755 the bin
-* binary
-* guts
-* package
-* 1st
+- First stable release
