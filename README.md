@@ -1,33 +1,36 @@
-Utilities for determining whether characters belong to character classes defined
-by the XML specs.
+# wrappy
 
-## Organization
+Callback wrapping utility
 
-It used to be that the library was contained in a single file and you could just
-import/require/what-have-you the `xmlchars` module. However, that setup did not
-work well for people who cared about code optimization. Importing `xmlchars`
-meant importing *all* of the library and because of the way the code was
-generated there was no way to shake the resulting code tree.
+## USAGE
 
-Different modules cover different standards. At the time this documentation was
-last updated, we had:
+```javascript
+var wrappy = require("wrappy")
 
-* `xmlchars/xml/1.0/ed5` which covers XML 1.0 edition 5.
-* `xmlchars/xml/1.0/ed4` which covers XML 1.0 edition 4.
-* `xmlchars/xml/1.1/ed2` which covers XML 1.0 edition 2.
-* `xmlchars/xmlns/1.0/ed3` which covers XML Namespaces 1.0 edition 3.
+// var wrapper = wrappy(wrapperFunction)
 
-## Features
+// make sure a cb is called only once
+// See also: http://npm.im/once for this specific use case
+var once = wrappy(function (cb) {
+  var called = false
+  return function () {
+    if (called) return
+    called = true
+    return cb.apply(this, arguments)
+  }
+})
 
-The "things" each module contains can be categorized as follows:
+function printBoo () {
+  console.log('boo')
+}
+// has some rando property
+printBoo.iAmBooPrinter = true
 
-1. "Fragments": these are parts and pieces of regular expressions that
-correspond to the productions defined in the standard that the module
-covers. You'd use these to *build regular expressions*.
+var onlyPrintOnce = once(printBoo)
 
-2. Regular expressions that correspond to the productions defined in the
-standard that the module covers.
+onlyPrintOnce() // prints 'boo'
+onlyPrintOnce() // does nothing
 
-3. Lists: these are arrays of characters that correspond to the productions.
-
-4. Functions that test code points to verify whether they fit a production.
+// random property is retained!
+assert.equal(onlyPrintOnce.iAmBooPrinter, true)
+```
