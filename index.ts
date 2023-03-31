@@ -1,35 +1,38 @@
 /*
-  Copyright 2018 Google LLC
+  Copyright 2020 Google LLC
 
   Use of this source code is governed by an MIT-style
   license that can be found in the LICENSE file or at
   https://opensource.org/licenses/MIT.
 */
 
+import {googleFontsCache, GoogleFontCacheOptions} from './googleFontsCache';
+import {imageCache, ImageCacheOptions} from './imageCache';
 import {
-  NavigationRoute,
-  NavigationRouteMatchOptions,
-} from './NavigationRoute.js';
-import {RegExpRoute} from './RegExpRoute.js';
-import {registerRoute} from './registerRoute.js';
-import {Route} from './Route.js';
-import {Router} from './Router.js';
-import {setCatchHandler} from './setCatchHandler.js';
-import {setDefaultHandler} from './setDefaultHandler.js';
+  staticResourceCache,
+  StaticResourceOptions,
+} from './staticResourceCache';
+import {pageCache, PageCacheOptions} from './pageCache';
+import {offlineFallback, OfflineFallbackOptions} from './offlineFallback';
+import {warmStrategyCache, WarmStrategyCacheOptions} from './warmStrategyCache';
 
 import './_version.js';
 
 /**
- * @module workbox-routing
+ * @module workbox-recipes
  */
 
 export {
-  NavigationRoute,
-  RegExpRoute,
-  registerRoute,
-  Route,
-  Router,
-  setCatchHandler,
-  setDefaultHandler,
-  NavigationRouteMatchOptions,
+  GoogleFontCacheOptions,
+  googleFontsCache,
+  imageCache,
+  ImageCacheOptions,
+  offlineFallback,
+  OfflineFallbackOptions,
+  pageCache,
+  PageCacheOptions,
+  staticResourceCache,
+  StaticResourceOptions,
+  warmStrategyCache,
+  WarmStrategyCacheOptions,
 };

@@ -1,11 +1,7 @@
-import { googleFontsCache, GoogleFontCacheOptions } from './googleFontsCache';
-import { imageCache, ImageCacheOptions } from './imageCache';
-import { staticResourceCache, StaticResourceOptions } from './staticResourceCache';
-import { pageCache, PageCacheOptions } from './pageCache';
-import { offlineFallback, OfflineFallbackOptions } from './offlineFallback';
-import { warmStrategyCache, WarmStrategyCacheOptions } from './warmStrategyCache';
+import { createPartialResponse } from './createPartialResponse.js';
+import { RangeRequestsPlugin } from './RangeRequestsPlugin.js';
 import './_version.js';
 /**
- * @module workbox-recipes
+ * @module workbox-range-requests
  */
-export { GoogleFontCacheOptions, googleFontsCache, imageCache, ImageCacheOptions, offlineFallback, OfflineFallbackOptions, pageCache, PageCacheOptions, staticResourceCache, StaticResourceOptions, warmStrategyCache, WarmStrategyCacheOptions, };
+export { createPartialResponse, RangeRequestsPlugin };
