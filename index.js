@@ -1,74 +1,287 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+/* global __resourceQuery, __webpack_hash__ */
+/// <reference types="webpack/module" />
+import webpackHotLog from "webpack/hot/log.js";
+import stripAnsi from "./utils/stripAnsi.js";
+import parseURL from "./utils/parseURL.js";
+import socket from "./socket.js";
+import { formatProblem, createOverlay } from "./overlay.js";
+import { log, logEnabledFeatures, setLogLevel } from "./utils/log.js";
+import sendMessage from "./utils/sendMessage.js";
+import reloadApp from "./utils/reloadApp.js";
+import createSocketURL from "./utils/createSocketURL.js";
+
+/**
+ * @typedef {Object} Options
+ * @property {boolean} hot
+ * @property {boolean} liveReload
+ * @property {boolean} progress
+ * @property {boolean | { warnings?: boolean, errors?: boolean, runtimeErrors?: boolean, trustedTypesPolicyName?: string }} overlay
+ * @property {string} [logging]
+ * @property {number} [reconnect]
+ */
+
+/**
+ * @typedef {Object} Status
+ * @property {boolean} isUnloading
+ * @property {string} currentHash
+ * @property {string} [previousHash]
+ */
+
+/**
+ * @type {Status}
+ */
+var status = {
+  isUnloading: false,
+  // TODO Workaround for webpack v4, `__webpack_hash__` is not replaced without HotModuleReplacement
+  // eslint-disable-next-line camelcase
+  currentHash: typeof __webpack_hash__ !== "undefined" ? __webpack_hash__ : ""
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.WebpackManifestPlugin = exports.getCompilerHooks = void 0;
-const path_1 = require("path");
-const webpack_1 = __importDefault(require("webpack"));
-const NormalModule_1 = __importDefault(require("webpack/lib/NormalModule"));
-const hooks_1 = require("./hooks");
-Object.defineProperty(exports, "getCompilerHooks", { enumerable: true, get: function () { return hooks_1.getCompilerHooks; } });
-const emitCountMap = new Map();
-const defaults = {
-    assetHookStage: Infinity,
-    basePath: '',
-    fileName: 'manifest.json',
-    filter: null,
-    generate: void 0,
-    map: null,
-    publicPath: null,
-    removeKeyHash: /([a-f0-9]{16,32}\.?)/gi,
-    seed: void 0,
-    serialize(manifest) {
-        return JSON.stringify(manifest, null, 2);
-    },
-    sort: null,
-    transformExtensions: /^(gz|map)$/i,
-    useEntryKeys: false,
-    useLegacyEmit: false,
-    writeToFileEmit: false
+
+/** @type {Options} */
+var options = {
+  hot: false,
+  liveReload: false,
+  progress: false,
+  overlay: false
 };
-class WebpackManifestPlugin {
-    constructor(opts) {
-        this.options = Object.assign({}, defaults, opts);
-    }
-    apply(compiler) {
-        var _a, _b, _c;
-        const moduleAssets = {};
-        const manifestFileName = path_1.resolve(((_a = compiler.options.output) === null || _a === void 0 ? void 0 : _a.path) || './', this.options.fileName);
-        const manifestAssetId = path_1.relative(((_b = compiler.options.output) === null || _b === void 0 ? void 0 : _b.path) || './', manifestFileName);
-        const beforeRun = hooks_1.beforeRunHook.bind(this, { emitCountMap, manifestFileName });
-        const emit = hooks_1.emitHook.bind(this, {
-            compiler,
-            emitCountMap,
-            manifestAssetId,
-            manifestFileName,
-            moduleAssets,
-            options: this.options
-        });
-        const normalModuleLoader = hooks_1.normalModuleLoaderHook.bind(this, { moduleAssets });
-        const hookOptions = {
-            name: 'WebpackManifestPlugin',
-            stage: this.options.assetHookStage
-        };
-        compiler.hooks.compilation.tap(hookOptions, (compilation) => {
-            const hook = !NormalModule_1.default.getCompilationHooks
-                ? compilation.hooks.normalModuleLoader
-                : NormalModule_1.default.getCompilationHooks(compilation).loader;
-            hook.tap(hookOptions, normalModuleLoader);
-        });
-        if (((_c = webpack_1.default.version) === null || _c === void 0 ? void 0 : _c.startsWith('4')) || this.options.useLegacyEmit === true) {
-            compiler.hooks.emit.tap(hookOptions, emit);
-        }
-        else {
-            compiler.hooks.thisCompilation.tap(hookOptions, (compilation) => {
-                compilation.hooks.processAssets.tap(hookOptions, () => emit(compilation));
-            });
-        }
-        compiler.hooks.run.tap(hookOptions, beforeRun);
-        compiler.hooks.watchRun.tap(hookOptions, beforeRun);
-    }
+var parsedResourceQuery = parseURL(__resourceQuery);
+var enabledFeatures = {
+  "Hot Module Replacement": false,
+  "Live Reloading": false,
+  Progress: false,
+  Overlay: false
+};
+if (parsedResourceQuery.hot === "true") {
+  options.hot = true;
+  enabledFeatures["Hot Module Replacement"] = true;
 }
-exports.WebpackManifestPlugin = WebpackManifestPlugin;
-//# sourceMappingURL=index.js.map
+if (parsedResourceQuery["live-reload"] === "true") {
+  options.liveReload = true;
+  enabledFeatures["Live Reloading"] = true;
+}
+if (parsedResourceQuery.progress === "true") {
+  options.progress = true;
+  enabledFeatures.Progress = true;
+}
+if (parsedResourceQuery.overlay) {
+  try {
+    options.overlay = JSON.parse(parsedResourceQuery.overlay);
+  } catch (e) {
+    log.error("Error parsing overlay options from resource query:", e);
+  }
+
+  // Fill in default "true" params for partially-specified objects.
+  if (typeof options.overlay === "object") {
+    options.overlay = _objectSpread({
+      errors: true,
+      warnings: true,
+      runtimeErrors: true
+    }, options.overlay);
+  }
+  enabledFeatures.Overlay = true;
+}
+if (parsedResourceQuery.logging) {
+  options.logging = parsedResourceQuery.logging;
+}
+if (typeof parsedResourceQuery.reconnect !== "undefined") {
+  options.reconnect = Number(parsedResourceQuery.reconnect);
+}
+
+/**
+ * @param {string} level
+ */
+function setAllLogLevel(level) {
+  // This is needed because the HMR logger operate separately from dev server logger
+  webpackHotLog.setLogLevel(level === "verbose" || level === "log" ? "info" : level);
+  setLogLevel(level);
+}
+if (options.logging) {
+  setAllLogLevel(options.logging);
+}
+logEnabledFeatures(enabledFeatures);
+self.addEventListener("beforeunload", function () {
+  status.isUnloading = true;
+});
+var overlay = typeof window !== "undefined" ? createOverlay(typeof options.overlay === "object" ? {
+  trustedTypesPolicyName: options.overlay.trustedTypesPolicyName,
+  catchRuntimeError: options.overlay.runtimeErrors
+} : {
+  trustedTypesPolicyName: false,
+  catchRuntimeError: options.overlay
+}) : {
+  send: function send() {}
+};
+var onSocketMessage = {
+  hot: function hot() {
+    if (parsedResourceQuery.hot === "false") {
+      return;
+    }
+    options.hot = true;
+  },
+  liveReload: function liveReload() {
+    if (parsedResourceQuery["live-reload"] === "false") {
+      return;
+    }
+    options.liveReload = true;
+  },
+  invalid: function invalid() {
+    log.info("App updated. Recompiling...");
+
+    // Fixes #1042. overlay doesn't clear if errors are fixed but warnings remain.
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    sendMessage("Invalid");
+  },
+  /**
+   * @param {string} hash
+   */
+  hash: function hash(_hash) {
+    status.previousHash = status.currentHash;
+    status.currentHash = _hash;
+  },
+  logging: setAllLogLevel,
+  /**
+   * @param {boolean} value
+   */
+  overlay: function overlay(value) {
+    if (typeof document === "undefined") {
+      return;
+    }
+    options.overlay = value;
+  },
+  /**
+   * @param {number} value
+   */
+  reconnect: function reconnect(value) {
+    if (parsedResourceQuery.reconnect === "false") {
+      return;
+    }
+    options.reconnect = value;
+  },
+  /**
+   * @param {boolean} value
+   */
+  progress: function progress(value) {
+    options.progress = value;
+  },
+  /**
+   * @param {{ pluginName?: string, percent: number, msg: string }} data
+   */
+  "progress-update": function progressUpdate(data) {
+    if (options.progress) {
+      log.info("".concat(data.pluginName ? "[".concat(data.pluginName, "] ") : "").concat(data.percent, "% - ").concat(data.msg, "."));
+    }
+    sendMessage("Progress", data);
+  },
+  "still-ok": function stillOk() {
+    log.info("Nothing changed.");
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    sendMessage("StillOk");
+  },
+  ok: function ok() {
+    sendMessage("Ok");
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    reloadApp(options, status);
+  },
+  // TODO: remove in v5 in favor of 'static-changed'
+  /**
+   * @param {string} file
+   */
+  "content-changed": function contentChanged(file) {
+    log.info("".concat(file ? "\"".concat(file, "\"") : "Content", " from static directory was changed. Reloading..."));
+    self.location.reload();
+  },
+  /**
+   * @param {string} file
+   */
+  "static-changed": function staticChanged(file) {
+    log.info("".concat(file ? "\"".concat(file, "\"") : "Content", " from static directory was changed. Reloading..."));
+    self.location.reload();
+  },
+  /**
+   * @param {Error[]} warnings
+   * @param {any} params
+   */
+  warnings: function warnings(_warnings, params) {
+    log.warn("Warnings while compiling.");
+    var printableWarnings = _warnings.map(function (error) {
+      var _formatProblem = formatProblem("warning", error),
+        header = _formatProblem.header,
+        body = _formatProblem.body;
+      return "".concat(header, "\n").concat(stripAnsi(body));
+    });
+    sendMessage("Warnings", printableWarnings);
+    for (var i = 0; i < printableWarnings.length; i++) {
+      log.warn(printableWarnings[i]);
+    }
+    var needShowOverlayForWarnings = typeof options.overlay === "boolean" ? options.overlay : options.overlay && options.overlay.warnings;
+    if (needShowOverlayForWarnings) {
+      overlay.send({
+        type: "BUILD_ERROR",
+        level: "warning",
+        messages: _warnings
+      });
+    }
+    if (params && params.preventReloading) {
+      return;
+    }
+    reloadApp(options, status);
+  },
+  /**
+   * @param {Error[]} errors
+   */
+  errors: function errors(_errors) {
+    log.error("Errors while compiling. Reload prevented.");
+    var printableErrors = _errors.map(function (error) {
+      var _formatProblem2 = formatProblem("error", error),
+        header = _formatProblem2.header,
+        body = _formatProblem2.body;
+      return "".concat(header, "\n").concat(stripAnsi(body));
+    });
+    sendMessage("Errors", printableErrors);
+    for (var i = 0; i < printableErrors.length; i++) {
+      log.error(printableErrors[i]);
+    }
+    var needShowOverlayForErrors = typeof options.overlay === "boolean" ? options.overlay : options.overlay && options.overlay.errors;
+    if (needShowOverlayForErrors) {
+      overlay.send({
+        type: "BUILD_ERROR",
+        level: "error",
+        messages: _errors
+      });
+    }
+  },
+  /**
+   * @param {Error} error
+   */
+  error: function error(_error) {
+    log.error(_error);
+  },
+  close: function close() {
+    log.info("Disconnected!");
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    sendMessage("Close");
+  }
+};
+var socketURL = createSocketURL(parsedResourceQuery);
+socket(socketURL, onSocketMessage, options.reconnect);
