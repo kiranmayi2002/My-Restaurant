@@ -1,127 +1,127 @@
-# YAML <a href="https://www.npmjs.com/package/yaml"><img align="right" src="https://badge.fury.io/js/yaml.svg" title="npm package" /></a>
+# y18n
 
-`yaml` is a JavaScript parser and stringifier for [YAML](http://yaml.org/), a human friendly data serialization standard. It supports both parsing and stringifying data using all versions of YAML, along with all common data schemas. As a particularly distinguishing feature, `yaml` fully supports reading and writing comments and blank lines in YAML documents.
+[![NPM version][npm-image]][npm-url]
+[![js-standard-style][standard-image]][standard-url]
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
-The library is released under the ISC open source license, and the code is [available on GitHub](https://github.com/eemeli/yaml/). It has no external dependencies and runs on Node.js 6 and later, and in browsers from IE 11 upwards.
+The bare-bones internationalization library used by yargs.
 
-For the purposes of versioning, any changes that break any of the endpoints or APIs documented here will be considered semver-major breaking changes. Undocumented library internals may change between minor versions, and previous APIs may be deprecated (but not removed).
+Inspired by [i18n](https://www.npmjs.com/package/i18n).
 
-For more information, see the project's documentation site: [**eemeli.org/yaml/v1**](https://eemeli.org/yaml/v1/)
+## Examples
 
-To install:
-
-```sh
-npm install yaml
-```
-
-**Note:** This is `yaml@1`. You may also be interested in the next version, currently available as [`yaml@next`](https://www.npmjs.com/package/yaml/v/next).
-
-## API Overview
-
-The API provided by `yaml` has three layers, depending on how deep you need to go: [Parse & Stringify](https://eemeli.org/yaml/v1/#parse-amp-stringify), [Documents](https://eemeli.org/yaml/#documents), and the [CST Parser](https://eemeli.org/yaml/#cst-parser). The first has the simplest API and "just works", the second gets you all the bells and whistles supported by the library along with a decent [AST](https://eemeli.org/yaml/#content-nodes), and the third is the closest to YAML source, making it fast, raw, and crude.
+_simple string translation:_
 
 ```js
-import YAML from 'yaml'
-// or
-const YAML = require('yaml')
+const __ = require('y18n')().__;
+
+console.log(__('my awesome string %s', 'foo'));
 ```
 
-### Parse & Stringify
+output:
 
-- [`YAML.parse(str, options): value`](https://eemeli.org/yaml/v1/#yaml-parse)
-- [`YAML.stringify(value, options): string`](https://eemeli.org/yaml/v1/#yaml-stringify)
+`my awesome string foo`
 
-### YAML Documents
-
-- [`YAML.createNode(value, wrapScalars, tag): Node`](https://eemeli.org/yaml/v1/#creating-nodes)
-- [`YAML.defaultOptions`](https://eemeli.org/yaml/v1/#options)
-- [`YAML.Document`](https://eemeli.org/yaml/v1/#yaml-documents)
-  - [`constructor(options)`](https://eemeli.org/yaml/v1/#creating-documents)
-  - [`defaults`](https://eemeli.org/yaml/v1/#options)
-  - [`#anchors`](https://eemeli.org/yaml/v1/#working-with-anchors)
-  - [`#contents`](https://eemeli.org/yaml/v1/#content-nodes)
-  - [`#errors`](https://eemeli.org/yaml/v1/#errors)
-- [`YAML.parseAllDocuments(str, options): YAML.Document[]`](https://eemeli.org/yaml/v1/#parsing-documents)
-- [`YAML.parseDocument(str, options): YAML.Document`](https://eemeli.org/yaml/v1/#parsing-documents)
+_using tagged template literals_
 
 ```js
-import { Pair, YAMLMap, YAMLSeq } from 'yaml/types'
+const __ = require('y18n')().__;
+
+const str = 'foo';
+
+console.log(__`my awesome string ${str}`);
 ```
 
-- [`new Pair(key, value)`](https://eemeli.org/yaml/v1/#creating-nodes)
-- [`new YAMLMap()`](https://eemeli.org/yaml/v1/#creating-nodes)
-- [`new YAMLSeq()`](https://eemeli.org/yaml/v1/#creating-nodes)
+output:
 
-### CST Parser
+`my awesome string foo`
+
+_pluralization support:_
 
 ```js
-import parseCST from 'yaml/parse-cst'
+const __n = require('y18n')().__n;
+
+console.log(__n('one fish %s', '%d fishes %s', 2, 'foo'));
 ```
 
-- [`parseCST(str): CSTDocument[]`](https://eemeli.org/yaml/v1/#parsecst)
-- [`YAML.parseCST(str): CSTDocument[]`](https://eemeli.org/yaml/v1/#parsecst)
+output:
 
-## YAML.parse
+`2 fishes foo`
 
-```yaml
-# file.yml
-YAML:
-  - A human-readable data serialization language
-  - https://en.wikipedia.org/wiki/YAML
-yaml:
-  - A complete JavaScript implementation
-  - https://www.npmjs.com/package/yaml
+## Deno Example
+
+As of `v5` `y18n` supports [Deno](https://github.com/denoland/deno):
+
+```typescript
+import y18n from "https://deno.land/x/y18n/deno.ts";
+
+const __ = y18n({
+  locale: 'pirate',
+  directory: './test/locales'
+}).__
+
+console.info(__`Hi, ${'Ben'} ${'Coe'}!`)
 ```
 
-```js
-import fs from 'fs'
-import YAML from 'yaml'
+You will need to run with `--allow-read` to load alternative locales.
 
-YAML.parse('3.14159')
-// 3.14159
+## JSON Language Files
 
-YAML.parse('[ true, false, maybe, null ]\n')
-// [ true, false, 'maybe', null ]
+The JSON language files should be stored in a `./locales` folder.
+File names correspond to locales, e.g., `en.json`, `pirate.json`.
 
-const file = fs.readFileSync('./file.yml', 'utf8')
-YAML.parse(file)
-// { YAML:
-//   [ 'A human-readable data serialization language',
-//     'https://en.wikipedia.org/wiki/YAML' ],
-//   yaml:
-//   [ 'A complete JavaScript implementation',
-//     'https://www.npmjs.com/package/yaml' ] }
-```
+When strings are observed for the first time they will be
+added to the JSON file corresponding to the current locale.
 
-## YAML.stringify
+## Methods
 
-```js
-import YAML from 'yaml'
+### require('y18n')(config)
 
-YAML.stringify(3.14159)
-// '3.14159\n'
+Create an instance of y18n with the config provided, options include:
 
-YAML.stringify([true, false, 'maybe', null])
-// `- true
-// - false
-// - maybe
-// - null
-// `
+* `directory`: the locale directory, default `./locales`.
+* `updateFiles`: should newly observed strings be updated in file, default `true`.
+* `locale`: what locale should be used.
+* `fallbackToLanguage`: should fallback to a language-only file (e.g. `en.json`)
+  be allowed if a file matching the locale does not exist (e.g. `en_US.json`),
+  default `true`.
 
-YAML.stringify({ number: 3, plain: 'string', block: 'two\nlines\n' })
-// `number: 3
-// plain: string
-// block: >
-//   two
-//
-//   lines
-// `
-```
+### y18n.\_\_(str, arg, arg, arg)
 
----
+Print a localized string, `%s` will be replaced with `arg`s.
 
-Browser testing provided by:
+This function can also be used as a tag for a template literal. You can use it
+like this: <code>__&#96;hello ${'world'}&#96;</code>. This will be equivalent to
+`__('hello %s', 'world')`.
 
-<a href="https://www.browserstack.com/open-source">
-<img width=200 src="https://eemeli.org/yaml/images/browserstack.svg" />
-</a>
+### y18n.\_\_n(singularString, pluralString, count, arg, arg, arg)
+
+Print a localized string with appropriate pluralization. If `%d` is provided
+in the string, the `count` will replace this placeholder.
+
+### y18n.setLocale(str)
+
+Set the current locale being used.
+
+### y18n.getLocale()
+
+What locale is currently being used?
+
+### y18n.updateLocale(obj)
+
+Update the current locale with the key value pairs in `obj`.
+
+## Supported Node.js Versions
+
+Libraries in this ecosystem make a best effort to track
+[Node.js' release schedule](https://nodejs.org/en/about/releases/). Here's [a
+post on why we think this is important](https://medium.com/the-node-js-collection/maintainers-should-consider-following-node-js-release-schedule-ab08ed4de71a).
+
+## License
+
+ISC
+
+[npm-url]: https://npmjs.org/package/y18n
+[npm-image]: https://img.shields.io/npm/v/y18n.svg
+[standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
+[standard-url]: https://github.com/feross/standard
