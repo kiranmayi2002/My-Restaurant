@@ -1,5 +1,23 @@
-# use-sync-external-store
+# Update Browserslist DB
 
-Backwards-compatible shim for [`React.useSyncExternalStore`](https://reactjs.org/docs/hooks-reference.html#usesyncexternalstore). Works with any React that supports Hooks.
+<img width="120" height="120" alt="Browserslist logo by Anton Popov"
+     src="https://browsersl.ist/logo.svg" align="right">
 
-See also https://github.com/reactwg/react-18/discussions/86.
+CLI tool to update `caniuse-lite` with browsers DB
+from [Browserslist](https://github.com/browserslist/browserslist/) config.
+
+Some queries like `last 2 version` or `>1%` depends on actual data
+from `caniuse-lite`.
+
+```sh
+npx update-browserslist-db@latest
+```
+
+<a href="https://evilmartians.com/?utm_source=update-browserslist-db">
+  <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
+       alt="Sponsored by Evil Martians" width="236" height="54">
+</a>
+
+
+## Docs
+Read **[full docs](https://github.com/browserslist/update-db#readme)** on GitHub.
