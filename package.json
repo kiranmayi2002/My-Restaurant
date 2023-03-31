@@ -1,31 +1,69 @@
 {
-  "name": "workbox-background-sync",
-  "version": "6.5.4",
-  "license": "MIT",
-  "author": "Google's Web DevRel Team",
-  "description": "Queues failed requests and uses the Background Sync API to replay them when the network is available",
-  "repository": "googlechrome/workbox",
-  "bugs": "https://github.com/googlechrome/workbox/issues",
-  "homepage": "https://github.com/GoogleChrome/workbox",
-  "keywords": [
-    "workbox",
-    "workboxjs",
-    "service worker",
-    "sw",
-    "background",
-    "sync",
-    "workbox-plugin"
-  ],
-  "workbox": {
-    "browserNamespace": "workbox.backgroundSync",
-    "packageType": "sw"
-  },
-  "main": "index.js",
-  "module": "index.mjs",
-  "types": "index.d.ts",
-  "dependencies": {
-    "idb": "^7.0.1",
-    "workbox-core": "6.5.4"
-  },
-  "gitHead": "5e69c3f6a74ea0e6b1a0d3261a6cde11d8075859"
+	"name": "which-collection",
+	"version": "1.0.1",
+	"description": "Which kind of Collection (Map, Set, WeakMap, WeakSet) is this JavaScript value? Works cross-realm, without `instanceof`, and despite Symbol.toStringTag.",
+	"main": "index.js",
+	"type": "commonjs",
+	"exports": {
+		".": [
+			{
+				"default": "./index.js"
+			},
+			"./index.js"
+		],
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"prepublish": "safe-publish-latest",
+		"lint": "eslint .",
+		"pretest": "npm run lint",
+		"tests-only": "node test",
+		"test": "npm run tests-only",
+		"posttest": "npx aud",
+		"version": "auto-changelog && git add CHANGELOG.md",
+		"postversion": "auto-changelog && git add CHANGELOG.md && git commit --no-edit --amend && git tag -f \"v$(node -e \"console.log(require('./package.json').version)\")\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/inspect-js/which-collection.git"
+	},
+	"keywords": [
+		"map",
+		"set",
+		"weakmap",
+		"weakset",
+		"collection.es6",
+		"es2015"
+	],
+	"author": "Jordan Harband <ljharb@gmail.com>",
+	"funding": {
+		"url": "https://github.com/sponsors/ljharb"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/inspect-js/which-collection/issues"
+	},
+	"homepage": "https://github.com/inspect-js/which-collection#readme",
+	"devDependencies": {
+		"@ljharb/eslint-config": "^16.0.0",
+		"auto-changelog": "^1.16.2",
+		"eslint": "^6.8.0",
+		"for-each": "^0.3.3",
+		"object-inspect": "^1.7.0",
+		"safe-publish-latest": "^1.1.4",
+		"tape": "^5.0.0-next.4"
+	},
+	"dependencies": {
+		"is-map": "^2.0.1",
+		"is-set": "^2.0.1",
+		"is-weakmap": "^2.0.1",
+		"is-weakset": "^2.0.1"
+	},
+	"auto-changelog": {
+		"output": "CHANGELOG.md",
+		"template": "keepachangelog",
+		"unreleased": false,
+		"commitLimit": false,
+		"backfillLimit": false
+	}
 }
