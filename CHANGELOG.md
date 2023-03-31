@@ -5,56 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.0.2](https://github.com/ljharb/unbox-primitive/compare/v1.0.1...v1.0.2) - 2022-04-24
+## [v1.0.4](https://github.com/inspect-js/typed-array-length/compare/v1.0.3...v1.0.4) - 2022-05-23
 
 ### Commits
 
-- [actions] reuse common workflows [`e6420b9`](https://github.com/ljharb/unbox-primitive/commit/e6420b94eed3558ef3ecddbd3d85fe2f400d1db1)
-- [actions] update codecov uploader [`b90aff2`](https://github.com/ljharb/unbox-primitive/commit/b90aff2b17b70c1a7200eb5faa3f9e64ebf055f9)
-- [readme] add github actions/codecov badges; update URLs [`bcc39b9`](https://github.com/ljharb/unbox-primitive/commit/bcc39b9d6d101bad199c95604f94999f80d6da97)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `object-inspect`, `safe-publish-latest`, `tape` [`a704a32`](https://github.com/ljharb/unbox-primitive/commit/a704a32ec4af43cd0631317ae3a537012adc1610)
-- [Refactor] use `call-bind` instead of `function-bind` [`0a609f1`](https://github.com/ljharb/unbox-primitive/commit/0a609f1be6269cbf501482aacd9a0a1bd8596108)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `object-inspect`, `safe-publish-latest`, `tape` [`6a45317`](https://github.com/ljharb/unbox-primitive/commit/6a4531757d74af97c9d0770b102f81ce6ff0a8dc)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `object-inspect`, `tape` [`795c76f`](https://github.com/ljharb/unbox-primitive/commit/795c76f14c4df3c7ae934f7b14a98c07951ea9c7)
-- [Deps] update `has-bigints`, `has-symbols` [`257a065`](https://github.com/ljharb/unbox-primitive/commit/257a065496b4190c296d674bff342ea40cf8e176)
+- [actions] reuse common workflows [`dfd4a37`](https://github.com/inspect-js/typed-array-length/commit/dfd4a37d851a28e3d74d892a69874e02f2e58c37)
+- [meta] use `npmignore` to autogenerate an npmignore file [`a837e80`](https://github.com/inspect-js/typed-array-length/commit/a837e80d4029f26785ab9f3aa571ca782ac8e851)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `is-callable`, `object-inspect`, `tape` [`7b05a87`](https://github.com/inspect-js/typed-array-length/commit/7b05a8772af399e52bb448618a246cd34d3e3273)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `object-inspect`, `tape` [`c495f6e`](https://github.com/inspect-js/typed-array-length/commit/c495f6e050a4a7463a82c9195f31f44cf2760945)
+- [meta] simplify "exports" [`e42a6b6`](https://github.com/inspect-js/typed-array-length/commit/e42a6b6b0dc243fce32df20a75a7962782ef2a83)
+- [Fix] ensure `for-each` dependency is properly listed [`8ec761c`](https://github.com/inspect-js/typed-array-length/commit/8ec761ca56c13927281d626958a2f55211e14f45)
+- [Deps] update `call-bind`, `is-typed-array` [`2cc173a`](https://github.com/inspect-js/typed-array-length/commit/2cc173a4216e167db896bea7b8e03edf8b2d3833)
+- [meta] add `safe-publish-latest` [`e8e3afa`](https://github.com/inspect-js/typed-array-length/commit/e8e3afa431ce98bbdbb68c9f8e3c029cc5128c6c)
+- [Deps] update `is-typed-array` [`cd8084d`](https://github.com/inspect-js/typed-array-length/commit/cd8084db59b734ac4519b6d47f96233b6f73b1a6)
 
-## [v1.0.1](https://github.com/ljharb/unbox-primitive/compare/v1.0.0...v1.0.1) - 2021-03-25
-
-### Commits
-
-- [Tests] use shared travis-ci configs [`f977e5f`](https://github.com/ljharb/unbox-primitive/commit/f977e5f8fa532dbc519bd78a48cf4b81c14720fe)
-- [Tests] migrate tests to Github Actions [`b89def6`](https://github.com/ljharb/unbox-primitive/commit/b89def60908a236aa1b5c756426f7cc61cf458dd)
-- [meta] do not publish github action workflow files [`325d1f1`](https://github.com/ljharb/unbox-primitive/commit/325d1f1836cecbe57ee148545de5aefcbe7a7dce)
-- readme [`810cd70`](https://github.com/ljharb/unbox-primitive/commit/810cd70f7b3c670cd55eae64466c89595175ee2a)
-- [Tests] run `nyc` on all tests; use `tape` runner [`2f5fb08`](https://github.com/ljharb/unbox-primitive/commit/2f5fb08930c8f8e5e069ac61891dc9bd76cb762b)
-- [meta] add `auto-changelog` [`03ed375`](https://github.com/ljharb/unbox-primitive/commit/03ed3759284493f19323eb0500f726d0851fc085)
-- [actions] add automatic rebasing / merge commit blocking [`6dec48d`](https://github.com/ljharb/unbox-primitive/commit/6dec48daa357fa79a5cac1add9ca33f7b56276cc)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `object-inspect`, `object-is`, `tape` [`528ed88`](https://github.com/ljharb/unbox-primitive/commit/528ed8826664b67f7eaf1fe7e2031c063b2d315f)
-- [actions] check out the entire repo [`5095b29`](https://github.com/ljharb/unbox-primitive/commit/5095b2981f44a78b3f9bfaa1a526f17a6823e383)
-- [actions] add "Allow Edits" workflow [`5aa26d7`](https://github.com/ljharb/unbox-primitive/commit/5aa26d7f0c32e0e78ba4bf3e5f9abb5478fd97fa)
-- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `object-inspect`, `object-is`, `safe-publish-latest`, `tape` [`afc18c6`](https://github.com/ljharb/unbox-primitive/commit/afc18c6cb59cbb6b514e0d8004c6fd264e2a27eb)
-- [readme] remove travis badge [`a025899`](https://github.com/ljharb/unbox-primitive/commit/a0258997a21604e1266840e6d167f0a870966e9b)
-- [Dev Deps] update `auto-changelog` [`9219a32`](https://github.com/ljharb/unbox-primitive/commit/9219a32844b2ce3ed0a7ea12a5910a3e92424e4e)
-- [readme] Fix missing paren in example [`73f5a33`](https://github.com/ljharb/unbox-primitive/commit/73f5a3340ca1ab6c227ed4632117d816d5e35317)
-- [Dev Deps] update `@ljharb/eslint-config`, `tape` [`e450acc`](https://github.com/ljharb/unbox-primitive/commit/e450accb54ab452f240768a5f0a98e5887b0ba8c)
-- [Deps] update `has-bigints`, `has-symbols`, `which-boxed-primitive` [`a4279b5`](https://github.com/ljharb/unbox-primitive/commit/a4279b504732002074e5dcb9c5509038d605f563)
-- [Dev Deps] update `auto-changelog`, `in-publish`, `tape` [`b351548`](https://github.com/ljharb/unbox-primitive/commit/b351548d31789c0d0af4c3bce55c2bdefe51b40f)
-- [actions] switch Automatic Rebase workflow to `pull_request_target` event [`f600382`](https://github.com/ljharb/unbox-primitive/commit/f600382db83025270969354ac52a72aadb0a7ffa)
-- [readme] fix travis links [`4d02fa9`](https://github.com/ljharb/unbox-primitive/commit/4d02fa9a4990812b048f8aefe6e46be80b68beef)
-- [Dev Deps] update `auto-changelog`; add `aud` [`07e74a3`](https://github.com/ljharb/unbox-primitive/commit/07e74a3ca90688122593095849757e3c05c46db0)
-- [meta] add `funding` field [`7ca4bd7`](https://github.com/ljharb/unbox-primitive/commit/7ca4bd71196e90a2fc9c7cb0ef4e30f949d5a853)
-- [Tests] only audit prod deps [`47d8d5f`](https://github.com/ljharb/unbox-primitive/commit/47d8d5fbd58bf472e7e83f79ccef7e8379d06b35)
-- [Deps] update `has-symbols` [`c70c15e`](https://github.com/ljharb/unbox-primitive/commit/c70c15e924191d11a271cff25bde657b0c3c3016)
-
-## v1.0.0 - 2019-08-10
+## [v1.0.3](https://github.com/inspect-js/typed-array-length/compare/v1.0.2...v1.0.3) - 2020-12-05
 
 ### Commits
 
-- [Tests] add `.travis.yml` [`8c9a5ef`](https://github.com/ljharb/unbox-primitive/commit/8c9a5efdb54be4866e2884bf32cbe830788b2c2a)
-- Initial commit [`feaff15`](https://github.com/ljharb/unbox-primitive/commit/feaff159eb999adc8763ff3e51d2d3d56d6164f8)
-- [Tests] add tests [`3dd18d6`](https://github.com/ljharb/unbox-primitive/commit/3dd18d65748efb4af9b8ca66f8d8c5521d8f2dec)
-- implementation [`472fb41`](https://github.com/ljharb/unbox-primitive/commit/472fb41d049ddee80ebf3219a5837e639a6e9341)
-- npm init [`e9e426f`](https://github.com/ljharb/unbox-primitive/commit/e9e426fc90b9a3f07ffc48db75f78c414f77bc2b)
-- [Tests] add linting [`139e74b`](https://github.com/ljharb/unbox-primitive/commit/139e74b94cdfd187b43b24de76c6d84af21ee467)
-- [meta] create FUNDING.yml [`a9509e1`](https://github.com/ljharb/unbox-primitive/commit/a9509e122163e2b9d98af421e5c0575df36e2310)
-- Only apps should have lockfiles [`b3d0834`](https://github.com/ljharb/unbox-primitive/commit/b3d0834d69dcbf4cbc1e61ccfaef05acf96cf630)
+- [Tests] migrate tests to Github Actions [`a578b83`](https://github.com/inspect-js/typed-array-length/commit/a578b83e68055c1e7c7120bc4583e1d6926fc268)
+- [meta] avoid publishing github workflows [`f064a4b`](https://github.com/inspect-js/typed-array-length/commit/f064a4bf9090202154249d969be0799c34804ad4)
+- [Tests] run `nyc` on all tests [`69b841e`](https://github.com/inspect-js/typed-array-length/commit/69b841e43042358c71c3290342514b6d107f08d1)
+- [Dev Deps] update `eslint`, `@ljharb/eslint-config`, `aud`, `auto-changelog`, `object-inspect`, `tape` [`4594e83`](https://github.com/inspect-js/typed-array-length/commit/4594e83250579cdbff870aa951e7af56ca169489)
+- [actions] add "Allow Edits" workflow [`81e953b`](https://github.com/inspect-js/typed-array-length/commit/81e953ba6b3f59c5657e0d17fa1e7619b94891f5)
+- [Deps] update `is-typed-array`; use `call-bind` instead of `es-abstract` [`e7da56b`](https://github.com/inspect-js/typed-array-length/commit/e7da56b3c03b7f0db9bb110444ec1ccf19d7e9f9)
+- [readme] remove travis badge [`6d610d8`](https://github.com/inspect-js/typed-array-length/commit/6d610d83cb78ac5286c5ca273f4b3c7289f7686e)
+- [actions] switch Automatic Rebase workflow to `pull_request_target` event [`2d0ad64`](https://github.com/inspect-js/typed-array-length/commit/2d0ad644a11f754e61b49d327fdf891605abbe58)
+
+## [v1.0.2](https://github.com/inspect-js/typed-array-length/compare/v1.0.1...v1.0.2) - 2020-04-22
+
+### Commits
+
+- [Dev Deps] update `make-arrow-function`, `make-generator-function` [`4facf69`](https://github.com/inspect-js/typed-array-length/commit/4facf697cafb36b9c1057dc4ca1a21d8550c564e)
+- [Deps] update `is-typed-array`, `es-abstract` [`aaf3585`](https://github.com/inspect-js/typed-array-length/commit/aaf3585429896b9520dedd886c07aa4a96b50615)
+- [Dev Deps] update `aud`, `auto-changelog` [`f10e298`](https://github.com/inspect-js/typed-array-length/commit/f10e298c7733b8de59231c1581c9b000c205edbd)
+- [meta] allow `package.json` to be required/imported [`104f4c6`](https://github.com/inspect-js/typed-array-length/commit/104f4c6a6363e600d54aeb7abd90e37d99693aaf)
+- [Tests] only audit prod deps [`c748ab5`](https://github.com/inspect-js/typed-array-length/commit/c748ab596de505483df14ca7eeda7f27aeb20383)
+- [Deps] update `es-abstract` [`6cd213e`](https://github.com/inspect-js/typed-array-length/commit/6cd213ec654da3325abc8190f8c07c860474d944)
+- [Dev Deps] update `tape` [`2b0b2ea`](https://github.com/inspect-js/typed-array-length/commit/2b0b2ea9be106e8a068597c3f499ef703cce1edb)
+- [Dev Deps] update `@ljharb/eslint-config` [`cf462f3`](https://github.com/inspect-js/typed-array-length/commit/cf462f3352cf2fd592e624746371e3de800a265d)
+- [Deps] update `is-typed-array` [`ff46995`](https://github.com/inspect-js/typed-array-length/commit/ff469955b5d92942ba066c77eac7467e0c4de1ec)
+
+## [v1.0.1](https://github.com/inspect-js/typed-array-length/compare/v1.0.0...v1.0.1) - 2020-01-19
+
+### Commits
+
+- readme [`d3643fd`](https://github.com/inspect-js/typed-array-length/commit/d3643fd11919844b1f42041ef980a1f33215b515)
+- [meta] fix "exports" field [`006e28b`](https://github.com/inspect-js/typed-array-length/commit/006e28b30b11f8948e607d13ef0e96c3d7d7f61f)
+
+## v1.0.0 - 2020-01-18
+
+### Commits
+
+- Initial commit [`5f9e2ec`](https://github.com/inspect-js/typed-array-length/commit/5f9e2ec6650f80dc894e354e9e98181b09006346)
+- Tests [`6b9cadb`](https://github.com/inspect-js/typed-array-length/commit/6b9cadb0c274933bc7ee5e3fc6a5a380163cbe76)
+- Implementation [`6a3cb50`](https://github.com/inspect-js/typed-array-length/commit/6a3cb50429f40fc4ac9020bbf9539560c1b70213)
+- npm init [`41d42cd`](https://github.com/inspect-js/typed-array-length/commit/41d42cddfd3d47df6c9d480cf77787eae1109432)
+- [meta] add `auto-changelog` [`4fd159b`](https://github.com/inspect-js/typed-array-length/commit/4fd159bc6535e86c370a2186d60a68656f0d8917)
+- [meta] add `funding` field; create FUNDING.yml [`6a9fca7`](https://github.com/inspect-js/typed-array-length/commit/6a9fca7e0fdf3ff3fd4b0f18596471ca3d050a39)
+- [actions] add automatic rebasing / merge commit blocking [`8303296`](https://github.com/inspect-js/typed-array-length/commit/83032967b14afd37c382d4bf2c1fc5c95e3764bd)
+- [Tests] add `npm run lint` [`47a9c21`](https://github.com/inspect-js/typed-array-length/commit/47a9c211f474dbe8528f6b28f50080eacd5bf7eb)
+- [Tests] use shared travis-ci configs [`d0c8915`](https://github.com/inspect-js/typed-array-length/commit/d0c89153e1c50f1eadd0b42521bcdcf3366b8af5)
+- Only apps should have lockfiles [`3eaef9c`](https://github.com/inspect-js/typed-array-length/commit/3eaef9cd192b1a25d1930739e7c0044e39ad3c0d)

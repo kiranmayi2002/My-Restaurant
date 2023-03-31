@@ -1,170 +1,64 @@
-# type-is
+# typed-array-length <sup>[![Version Badge][2]][1]</sup>
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
-[![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+[![dependency status][5]][6]
+[![dev dependency status][7]][8]
+[![License][license-image]][license-url]
+[![Downloads][downloads-image]][downloads-url]
 
-Infer the content-type of a request.
+[![npm badge][11]][1]
 
-### Install
+Robustly get the length of a Typed Array, or `false` if it is not a Typed Array. Works cross-realm, in every engine, even if the `length` property is overridden.
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
-
-```sh
-$ npm install type-is
-```
-
-## API
+## Example
 
 ```js
-var http = require('http')
-var typeis = require('type-is')
+var typedArrayLength = require('typed-array-length');
+var assert = require('assert');
 
-http.createServer(function (req, res) {
-  var istext = typeis(req, ['text/*'])
-  res.end('you ' + (istext ? 'sent' : 'did not send') + ' me text')
-})
+assert.equal(false, typedArrayLength(undefined));
+assert.equal(false, typedArrayLength(null));
+assert.equal(false, typedArrayLength(false));
+assert.equal(false, typedArrayLength(true));
+assert.equal(false, typedArrayLength([]));
+assert.equal(false, typedArrayLength({}));
+assert.equal(false, typedArrayLength(/a/g));
+assert.equal(false, typedArrayLength(new RegExp('a', 'g')));
+assert.equal(false, typedArrayLength(new Date()));
+assert.equal(false, typedArrayLength(42));
+assert.equal(false, typedArrayLength(NaN));
+assert.equal(false, typedArrayLength(Infinity));
+assert.equal(false, typedArrayLength(new Number(42)));
+assert.equal(false, typedArrayLength('foo'));
+assert.equal(false, typedArrayLength(Object('foo')));
+assert.equal(false, typedArrayLength(function () {}));
+assert.equal(false, typedArrayLength(function* () {}));
+assert.equal(false, typedArrayLength(x => x * x));
+assert.equal(false, typedArrayLength([]));
+
+assert.equal(1, typedArrayLength(new Int8Array(1)));
+assert.equal(2, typedArrayLength(new Uint8Array(2)));
+assert.equal(3, typedArrayLength(new Uint8ClampedArray(3)));
+assert.equal(4, typedArrayLength(new Int16Array(4)));
+assert.equal(5, typedArrayLength(new Uint16Array(5)));
+assert.equal(6, typedArrayLength(new Int32Array(6)));
+assert.equal(7, typedArrayLength(new Uint32Array(7)));
+assert.equal(8, typedArrayLength(new Float32Array(8)));
+assert.equal(9, typedArrayLength(new Float64Array(9)));
+assert.equal(10, typedArrayLength(new BigInt64Array(10)));
+assert.equal(11, typedArrayLength(new BigUint64Array(11)));
 ```
 
-### typeis(request, types)
+## Tests
+Simply clone the repo, `npm install`, and run `npm test`
 
-Checks if the `request` is one of the `types`. If the request has no body,
-even if there is a `Content-Type` header, then `null` is returned. If the
-`Content-Type` header is invalid or does not matches any of the `types`, then
-`false` is returned. Otherwise, a string of the type that matched is returned.
-
-The `request` argument is expected to be a Node.js HTTP request. The `types`
-argument is an array of type strings.
-
-Each type in the `types` array can be one of the following:
-
-- A file extension name such as `json`. This name will be returned if matched.
-- A mime type such as `application/json`.
-- A mime type with a wildcard such as `*/*` or `*/json` or `application/*`.
-  The full mime type will be returned if matched.
-- A suffix such as `+json`. This can be combined with a wildcard such as
-  `*/vnd+json` or `application/*+json`. The full mime type will be returned
-  if matched.
-
-Some examples to illustrate the inputs and returned value:
-
-<!-- eslint-disable no-undef -->
-
-```js
-// req.headers.content-type = 'application/json'
-
-typeis(req, ['json']) // => 'json'
-typeis(req, ['html', 'json']) // => 'json'
-typeis(req, ['application/*']) // => 'application/json'
-typeis(req, ['application/json']) // => 'application/json'
-
-typeis(req, ['html']) // => false
-```
-
-### typeis.hasBody(request)
-
-Returns a Boolean if the given `request` has a body, regardless of the
-`Content-Type` header.
-
-Having a body has no relation to how large the body is (it may be 0 bytes).
-This is similar to how file existence works. If a body does exist, then this
-indicates that there is data to read from the Node.js request stream.
-
-<!-- eslint-disable no-undef -->
-
-```js
-if (typeis.hasBody(req)) {
-  // read the body, since there is one
-
-  req.on('data', function (chunk) {
-    // ...
-  })
-}
-```
-
-### typeis.is(mediaType, types)
-
-Checks if the `mediaType` is one of the `types`. If the `mediaType` is invalid
-or does not matches any of the `types`, then `false` is returned. Otherwise, a
-string of the type that matched is returned.
-
-The `mediaType` argument is expected to be a
-[media type](https://tools.ietf.org/html/rfc6838) string. The `types` argument
-is an array of type strings.
-
-Each type in the `types` array can be one of the following:
-
-- A file extension name such as `json`. This name will be returned if matched.
-- A mime type such as `application/json`.
-- A mime type with a wildcard such as `*/*` or `*/json` or `application/*`.
-  The full mime type will be returned if matched.
-- A suffix such as `+json`. This can be combined with a wildcard such as
-  `*/vnd+json` or `application/*+json`. The full mime type will be returned
-  if matched.
-
-Some examples to illustrate the inputs and returned value:
-
-<!-- eslint-disable no-undef -->
-
-```js
-var mediaType = 'application/json'
-
-typeis.is(mediaType, ['json']) // => 'json'
-typeis.is(mediaType, ['html', 'json']) // => 'json'
-typeis.is(mediaType, ['application/*']) // => 'application/json'
-typeis.is(mediaType, ['application/json']) // => 'application/json'
-
-typeis.is(mediaType, ['html']) // => false
-```
-
-## Examples
-
-### Example body parser
-
-```js
-var express = require('express')
-var typeis = require('type-is')
-
-var app = express()
-
-app.use(function bodyParser (req, res, next) {
-  if (!typeis.hasBody(req)) {
-    return next()
-  }
-
-  switch (typeis(req, ['urlencoded', 'json', 'multipart'])) {
-    case 'urlencoded':
-      // parse urlencoded body
-      throw new Error('implement urlencoded body parsing')
-    case 'json':
-      // parse json body
-      throw new Error('implement json body parsing')
-    case 'multipart':
-      // parse multipart body
-      throw new Error('implement multipart body parsing')
-    default:
-      // 415 error code
-      res.statusCode = 415
-      res.end()
-      break
-  }
-})
-```
-
-## License
-
-[MIT](LICENSE)
-
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/type-is/master
-[coveralls-url]: https://coveralls.io/r/jshttp/type-is?branch=master
-[node-version-image]: https://badgen.net/npm/node/type-is
-[node-version-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/type-is
-[npm-url]: https://npmjs.org/package/type-is
-[npm-version-image]: https://badgen.net/npm/v/type-is
-[travis-image]: https://badgen.net/travis/jshttp/type-is/master
-[travis-url]: https://travis-ci.org/jshttp/type-is
+[1]: https://npmjs.org/package/typed-array-length
+[2]: https://versionbadg.es/inspect-js/typed-array-length.svg
+[5]: https://david-dm.org/inspect-js/typed-array-length.svg
+[6]: https://david-dm.org/inspect-js/typed-array-length
+[7]: https://david-dm.org/inspect-js/typed-array-length/dev-status.svg
+[8]: https://david-dm.org/inspect-js/typed-array-length#info=devDependencies
+[11]: https://nodei.co/npm/typed-array-length.png?downloads=true&stars=true
+[license-image]: http://img.shields.io/npm/l/typed-array-length.svg
+[license-url]: LICENSE
+[downloads-image]: http://img.shields.io/npm/dm/typed-array-length.svg
+[downloads-url]: http://npm-stat.com/charts.html?package=typed-array-length
