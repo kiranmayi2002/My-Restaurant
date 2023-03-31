@@ -1,24 +1,20 @@
-import './_version.js';
-/**
- * Get the current cache names and prefix/suffix used by Workbox.
- *
- * `cacheNames.precache` is used for precached assets,
- * `cacheNames.googleAnalytics` is used by `workbox-google-analytics` to
- * store `analytics.js`, and `cacheNames.runtime` is used for everything else.
- *
- * `cacheNames.prefix` can be used to retrieve just the current prefix value.
- * `cacheNames.suffix` can be used to retrieve just the current suffix value.
- *
- * @return {Object} An object with `precache`, `runtime`, `prefix`, and
- *     `googleAnalytics` properties.
- *
- * @memberof workbox-core
- */
-declare const cacheNames: {
-    readonly googleAnalytics: string;
-    readonly precache: string;
-    readonly prefix: string;
-    readonly runtime: string;
-    readonly suffix: string;
+import '../_version.js';
+export interface CacheNameDetails {
+    googleAnalytics: string;
+    precache: string;
+    prefix: string;
+    runtime: string;
+    suffix: string;
+}
+export interface PartialCacheNameDetails {
+    [propName: string]: string;
+}
+export declare type CacheNameDetailsProp = 'googleAnalytics' | 'precache' | 'prefix' | 'runtime' | 'suffix';
+export declare const cacheNames: {
+    updateDetails: (details: PartialCacheNameDetails) => void;
+    getGoogleAnalyticsName: (userCacheName?: string | undefined) => string;
+    getPrecacheName: (userCacheName?: string | undefined) => string;
+    getPrefix: () => string;
+    getRuntimeName: (userCacheName?: string | undefined) => string;
+    getSuffix: () => string;
 };
-export { cacheNames };
