@@ -1,70 +1,202 @@
-# Getting Started with Create React App
+<p align="center">
+  <img width="250" src="https://raw.githubusercontent.com/yargs/yargs/master/yargs-logo.png">
+</p>
+<h1 align="center"> Yargs </h1>
+<p align="center">
+  <b >Yargs be a node.js library fer hearties tryin' ter parse optstrings</b>
+</p>
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<br>
 
-## Available Scripts
+![ci](https://github.com/yargs/yargs/workflows/ci/badge.svg)
+[![NPM version][npm-image]][npm-url]
+[![js-standard-style][standard-image]][standard-url]
+[![Coverage][coverage-image]][coverage-url]
+[![Conventional Commits][conventional-commits-image]][conventional-commits-url]
+[![Slack][slack-image]][slack-url]
 
-In the project directory, you can run:
+## Description
+Yargs helps you build interactive command line tools, by parsing arguments and generating an elegant user interface.
 
-### `npm start`
+It gives you:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* commands and (grouped) options (`my-program.js serve --port=5000`).
+* a dynamically generated help menu based on your arguments:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+mocha [spec..]
 
-### `npm test`
+Run tests with Mocha
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Commands
+  mocha inspect [spec..]  Run tests with Mocha                         [default]
+  mocha init <path>       create a client-side Mocha setup at <path>
 
-### `npm run build`
+Rules & Behavior
+  --allow-uncaught           Allow uncaught errors to propagate        [boolean]
+  --async-only, -A           Require all tests to use a callback (async) or
+                             return a Promise                          [boolean]
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* bash-completion shortcuts for commands and options.
+* and [tons more](/docs/api.md).
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Stable version:
+```bash
+npm i yargs
+```
 
-### `npm run eject`
+Bleeding edge version with the most recent features:
+```bash
+npm i yargs@next
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Usage
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Simple Example
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```javascript
+#!/usr/bin/env node
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
+const argv = yargs(hideBin(process.argv)).argv
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+if (argv.ships > 3 && argv.distance < 53.5) {
+  console.log('Plunder more riffiwobbles!')
+} else {
+  console.log('Retreat from the xupptumblers!')
+}
+```
 
-## Learn More
+```bash
+$ ./plunder.js --ships=4 --distance=22
+Plunder more riffiwobbles!
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+$ ./plunder.js --ships 12 --distance 98.7
+Retreat from the xupptumblers!
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Complex Example
 
-### Code Splitting
+```javascript
+#!/usr/bin/env node
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+yargs(hideBin(process.argv))
+  .command('serve [port]', 'start the server', (yargs) => {
+    yargs
+      .positional('port', {
+        describe: 'port to bind on',
+        default: 5000
+      })
+  }, (argv) => {
+    if (argv.verbose) console.info(`start server on :${argv.port}`)
+    serve(argv.port)
+  })
+  .option('verbose', {
+    alias: 'v',
+    type: 'boolean',
+    description: 'Run with verbose logging'
+  })
+  .argv
+```
 
-### Analyzing the Bundle Size
+Run the example above with `--help` to see the help for the application.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Supported Platforms
 
-### Making a Progressive Web App
+### TypeScript
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+yargs has type definitions at [@types/yargs][type-definitions].
 
-### Advanced Configuration
+```
+npm i @types/yargs --save-dev
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+See usage examples in [docs](/docs/typescript.md).
 
-### Deployment
+### Deno
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+As of `v16`, `yargs` supports [Deno](https://github.com/denoland/deno):
 
-### `npm run build` fails to minify
+```typescript
+import yargs from 'https://deno.land/x/yargs/deno.ts'
+import { Arguments } from 'https://deno.land/x/yargs/deno-types.ts'
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+yargs(Deno.args)
+  .command('download <files...>', 'download a list of files', (yargs: any) => {
+    return yargs.positional('files', {
+      describe: 'a list of files to do something with'
+    })
+  }, (argv: Arguments) => {
+    console.info(argv)
+  })
+  .strictCommands()
+  .demandCommand(1)
+  .argv
+```
+
+### ESM
+
+As of `v16`,`yargs` supports ESM imports:
+
+```js
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
+yargs(hideBin(process.argv))
+  .command('curl <url>', 'fetch the contents of the URL', () => {}, (argv) => {
+    console.info(argv)
+  })
+  .demandCommand(1)
+  .argv
+```
+
+### Usage in Browser
+
+See examples of using yargs in the browser in [docs](/docs/browser.md).
+
+## Community
+
+Having problems? want to contribute? join our [community slack](http://devtoolscommunity.herokuapp.com).
+
+## Documentation
+
+### Table of Contents
+
+* [Yargs' API](/docs/api.md)
+* [Examples](/docs/examples.md)
+* [Parsing Tricks](/docs/tricks.md)
+  * [Stop the Parser](/docs/tricks.md#stop)
+  * [Negating Boolean Arguments](/docs/tricks.md#negate)
+  * [Numbers](/docs/tricks.md#numbers)
+  * [Arrays](/docs/tricks.md#arrays)
+  * [Objects](/docs/tricks.md#objects)
+  * [Quotes](/docs/tricks.md#quotes)
+* [Advanced Topics](/docs/advanced.md)
+  * [Composing Your App Using Commands](/docs/advanced.md#commands)
+  * [Building Configurable CLI Apps](/docs/advanced.md#configuration)
+  * [Customizing Yargs' Parser](/docs/advanced.md#customizing)
+  * [Bundling yargs](/docs/bundling.md)
+* [Contributing](/contributing.md)
+
+## Supported Node.js Versions
+
+Libraries in this ecosystem make a best effort to track
+[Node.js' release schedule](https://nodejs.org/en/about/releases/). Here's [a
+post on why we think this is important](https://medium.com/the-node-js-collection/maintainers-should-consider-following-node-js-release-schedule-ab08ed4de71a).
+
+[npm-url]: https://www.npmjs.com/package/yargs
+[npm-image]: https://img.shields.io/npm/v/yargs.svg
+[standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
+[standard-url]: http://standardjs.com/
+[conventional-commits-image]: https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg
+[conventional-commits-url]: https://conventionalcommits.org/
+[slack-image]: http://devtoolscommunity.herokuapp.com/badge.svg
+[slack-url]: http://devtoolscommunity.herokuapp.com
+[type-definitions]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/yargs
+[coverage-image]: https://img.shields.io/nycrc/yargs/yargs
+[coverage-url]: https://github.com/yargs/yargs/blob/master/.nycrc
