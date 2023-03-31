@@ -6,32 +6,13 @@
   https://opensource.org/licenses/MIT.
 */
 
-import {disable} from './disable.js';
-import {enable} from './enable.js';
-import {isSupported} from './isSupported.js';
+import {CacheExpiration} from './CacheExpiration.js';
+import {ExpirationPlugin, ExpirationPluginOptions} from './ExpirationPlugin.js';
+
 import './_version.js';
 
-// See https://github.com/GoogleChrome/workbox/issues/2946
-interface NavigationPreloadState {
-  enabled?: boolean;
-  headerValue?: string;
-}
-
-interface NavigationPreloadManager {
-  disable(): Promise<void>;
-  enable(): Promise<void>;
-  getState(): Promise<NavigationPreloadState>;
-  setHeaderValue(value: string): Promise<void>;
-}
-
-declare global {
-  interface ServiceWorkerRegistration {
-    readonly navigationPreload: NavigationPreloadManager;
-  }
-}
-
 /**
- * @module workbox-navigation-preload
+ * @module workbox-expiration
  */
 
-export {disable, enable, isSupported};
+export {CacheExpiration, ExpirationPlugin, ExpirationPluginOptions};
